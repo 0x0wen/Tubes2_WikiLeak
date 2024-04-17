@@ -1,6 +1,6 @@
 import '@/styles/globals.css'
 import {Inter as FontSans} from 'next/font/google'
-import {cn} from '@/frontend/lib/utils'
+import {cn} from '@//lib/utils'
 import {LayoutProps} from '@/.next/types/app/layout'
 import {Toaster} from '@/components/ui/toaster'
 
