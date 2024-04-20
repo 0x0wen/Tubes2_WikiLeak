@@ -30,6 +30,37 @@ func NewTreeNode(title string, link string) *TreeNode {
 	}
 }
 
+func isAlreadyExist(node *TreeNode, nodeList []*TreeNode) bool {
+	for i := 0; i < len(nodeList); i++ {
+		if nodeList[i].Link == node.Link {
+			return true
+		}
+	}
+	return false
+}
+
+func getTitle(link string) string {
+	// Instantiate a new collector
+	c := colly.NewCollector()
+	title := ""
+	// Find and visit link
+	c.OnHTML("span.mw-page-title-main", func(e *colly.HTMLElement) {
+		// Extract text or any other attribute you want
+
+		title = e.Text
+	})
+
+	c.OnScraped(func(r *colly.Response) {
+		// fmt.Println("Scraping finished for", r.Request.URL.String())
+
+	})
+	// Visit the URL you want to scrape
+	c.Visit("https://en.wikipedia.org" + link)
+
+	c.Wait()
+	return title
+}
+
 // add children node
 func (node *TreeNode) AddChild(child *TreeNode) {
 	child.Parent = node
@@ -94,10 +125,11 @@ func ScrapeLink(node *TreeNode, target string) {
 		c.OnHTML("a[href]", func(e *colly.HTMLElement) {
 			// Extract the href attribute of the <a> element
 			link := e.Attr("href")
+			teks := e.Text
 			// results <- link // Send the link to the results channel
 			if len(link) >= 6 {
 				if link[0:6] == "/wiki/" {
-					node.AddChild(NewTreeNode("", link))
+					node.AddChild(NewTreeNode(teks, link))
 
 				}
 			}
@@ -154,17 +186,26 @@ func BFSRace(node *TreeNode, target string, mutex *sync.Mutex) *TreeNode {
 			ScrapeLink(queue[0], target)
 			queue = append(queue, queue[0].Children...)
 			mutex.Unlock()
-		} else if len(queue)-i < 30 {
+		} else if len(queue)-i < 40 {
 
-			if j*4+5 < len(queue) {
+			if j*17+18 < len(queue) {
 				mutex.Lock()
 
-				for k := j*20 + 1; k < j*20+21; k++ {
+				for k := j*17 + 1; k < j*17+18; k++ {
 					wg.Add(1)
 					go func(k int) {
 						defer wg.Done()
 						ScrapeLink(queue[k], target)
-						queue = append(queue, queue[k].Children...)
+						var newChildren []*TreeNode
+
+						// Iterate over each element in the queue
+						for _, element := range queue[k].Children {
+							// Append the children of the current element to the newChildren slice
+							if !isAlreadyExist(element, queue) {
+								newChildren = append(newChildren, element)
+							}
+						}
+						queue = append(queue, newChildren...)
 					}(k)
 
 				}
@@ -174,11 +215,20 @@ func BFSRace(node *TreeNode, target string, mutex *sync.Mutex) *TreeNode {
 			} else {
 				mutex.Lock()
 				wg.Add(1)
-				for k := j*20 + 1; k < len(queue); k++ {
+				for k := j*17 + 1; k < len(queue); k++ {
 					go func(k int) {
 						defer wg.Done()
 						ScrapeLink(queue[k], target)
-						queue = append(queue, queue[k].Children...)
+						var newChildren []*TreeNode
+
+						// Iterate over each element in the queue
+						for _, element := range queue[k].Children {
+							// Append the children of the current element to the newChildren slice
+							if !isAlreadyExist(element, queue) {
+								newChildren = append(newChildren, element)
+							}
+						}
+						queue = append(queue, newChildren...)
 					}(k)
 				}
 				mutex.Unlock()
@@ -196,6 +246,104 @@ func BFSRace(node *TreeNode, target string, mutex *sync.Mutex) *TreeNode {
 	return nil
 
 }
+func BFSRaceBonus(node *TreeNode, target string, mutex *sync.Mutex) []*TreeNode {
+	// Request the HTML page.
+	if node == nil {
+		return nil
+	}
+
+	// Create a queue for BFS
+	queue := []*TreeNode{node}
+	result := []*TreeNode{}
+
+	// Perform BFS
+	j := 0
+	depth := -1
+	var wg sync.WaitGroup
+
+	for i := 0; depth == -1 || queue[len(queue)-1].id <= depth; i++ {
+		// Dequeue a node from the front of the queue
+		mutex.Lock()
+		current := queue[i]
+		mutex.Unlock()
+
+		if current.Parent != nil {
+			fmt.Println("BFS: ", current.Parent.Link, " ", current.Link, " ", current.id)
+		}
+
+		// Check if the current node's link matches the target link
+		if current.Link == target {
+			// Modify the title of the target node
+
+			depth = current.id
+			result = append(result, current) // Found the target node, return the modified node
+		}
+		// 	scraping
+		if i == 0 {
+			mutex.Lock()
+			ScrapeLink(queue[0], target)
+			queue = append(queue, queue[0].Children...)
+			mutex.Unlock()
+		} else if len(queue)-i < 40 {
+
+			if j*30+31 < len(queue) {
+				mutex.Lock()
+
+				for k := j*30 + 1; k < j*30+31; k++ {
+					wg.Add(1)
+					go func(k int) {
+						defer wg.Done()
+						ScrapeLink(queue[k], target)
+						var newChildren []*TreeNode
+
+						// Iterate over each element in the queue
+						for _, element := range queue[k].Children {
+							// Append the children of the current element to the newChildren slice
+							if !isAlreadyExist(element, queue) {
+								newChildren = append(newChildren, element)
+							}
+						}
+						queue = append(queue, newChildren...)
+					}(k)
+
+				}
+				j += 1
+				mutex.Unlock()
+
+			} else {
+				mutex.Lock()
+				wg.Add(1)
+				for k := j*30 + 1; k < len(queue); k++ {
+					go func(k int) {
+						defer wg.Done()
+						ScrapeLink(queue[k], target)
+						var newChildren []*TreeNode
+
+						// Iterate over each element in the queue
+						for _, element := range queue[k].Children {
+							// Append the children of the current element to the newChildren slice
+							if !isAlreadyExist(element, queue) {
+								newChildren = append(newChildren, element)
+							}
+						}
+						queue = append(queue, newChildren...)
+					}(k)
+				}
+				mutex.Unlock()
+
+				j += 1
+
+			}
+
+		}
+		wg.Wait()
+
+	}
+
+	// Target node not found
+	return result
+
+}
 
 func main() {
 	startTime := time.Now()
@@ -206,22 +354,35 @@ func main() {
 	// 	rw.Write(resp)
 	// })
 
+	// title := getTitle("/wiki/Albert_Einstein")
+	// fmt.Println("Ttitle: ", title)
 	// log.Println("Server is available at http://localhost:8000")
 	// log.Fatal(http.ListenAndServe(":8000", handler))
 	var mutex sync.Mutex
-	root := NewTreeNode("", "/wiki/ITB")
+	root := NewTreeNode("", "/wiki/Albert_Einstein")
 	// ScrapeLink(root, "/wiki/Sukarno", &mutex)
 	// for i := 0; i < root.GetNumberOfChildren(); i++ {
 	// 	ScrapeLink(root.Children[i], "/wiki/Sukarno", &mutex)
 	// }
 	// root.PrintNode(3)
-	result := BFSRace(root, "/wiki/Computer", &mutex)
+	result := BFSRaceBonus(root, "/wiki/Germany", &mutex)
 	endTime := time.Now()
 	duration := endTime.Sub(startTime)
 	fmt.Println("Duration: ", duration.Seconds(), " s")
-	for result != nil {
-		fmt.Println("Result")
-		fmt.Println(result.Link)
-		result = result.Parent
+
+	// for result != nil {
+	// 	fmt.Println("Title: ", result.Title)
+	// 	fmt.Println("Link: ", result.Link)
+	// 	result = result.Parent
+	// }
+
+	for i := 0; i < len(result); i++ {
+		fmt.Println("Result ", i+1, " : ")
+		for result[i] != nil {
+			fmt.Println("Title: ", result[i].Title)
+			fmt.Println("Link: ", result[i].Link)
+			result[i] = result[i].Parent
+		}
 	}
+
 }
