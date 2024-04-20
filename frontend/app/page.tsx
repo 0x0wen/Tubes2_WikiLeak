@@ -1,62 +1,32 @@
-'use client'
 import Form from './Form'
-
-import Image from 'next/image'
-
-const data = {
-	name: 'Parent',
-	children: [
-		{
-			name: 'Child One',
-			children: [
-				{
-					name: 'Child One',
-				},
-				{
-					name: 'Child Two',
-					children: [
-						{
-							name: 'Child One',
-						},
-						{
-							name: 'Child Two',
-							children: [
-								{
-									name: 'Child One',
-									children: [
-										{
-											name: 'Child One',
-										},
-										{
-											name: 'Child Two',
-										},
-									],
-								},
-								{
-									name: 'Child Two',
-								},
-							],
-						},
-					],
-				},
-			],
-		},
-		{
-			name: 'Child Two',
-		},
-	],
-}
+import ParticlesBackground from './ParticlesBackground'
+import ResultCard from './ResultCard'
 const Page = () => {
 	return (
-		<main className="flex justify-center items-center h-full w-full min-h-screen">
-			<div className="mx-auto my-auto w-[40rem] min-h-screen text-center space-y-6 flex flex-col justify-center">
-				<section>
-					<h1 className="font-mechanized text-7xl ">WikiLeak.</h1>
-					<p className="font-mono">Leak the deepest connection of things.</p>
+		<>
+			<main className="w-full h-screen flex flex-col">
+				<ParticlesBackground />
+				<section className="w-full h-screen flex ">
+					<div className="mx-auto my-auto w-full min-h-screen text-center space-y-6 flex justify-center items-center gap-10 z-50">
+						<section className="text-left w-fit">
+							<h1 className="font-mechanized text-8xl ">WikiLeak.</h1>
+							<p className="font-mono text-2xl">
+								<span className="font-semibold">Leak</span> the{' '}
+								<span className="strike">
+									<s>deepest</s>
+								</span>{' '}
+								<span className="underline">connection</span> of{' '}
+								<span className="text-red-700">things</span>.
+							</p>
+						</section>
+						<Form />
+					</div>
 				</section>
-				<Form />
-			</div>
-		</main>
+				<div className="w-full min-h-screen z-50 flex justify-center items-center">
+					<ResultCard />
+				</div>
+			</main>
+		</>
 	)
 }
 
