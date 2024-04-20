@@ -345,6 +345,66 @@ func BFSRaceBonus(node *TreeNode, target string, mutex *sync.Mutex) []*TreeNode 
 
 }
 
+func IDSrecursion(node []*TreeNode, depth int, target string, found *bool, result *TreeNode, mutex *sync.Mutex, wg *sync.WaitGroup) {
+	if depth == 0 {
+		for i := 0; !*found && i < len(node); i++ {
+			if node[i].Parent != nil {
+				fmt.Println("BFS: ", node[i].Parent.Link, " ", node[i].Link, " ", node[i].id)
+			}
+			fmt.Println(node[i].id)
+			if node[i].Link == target {
+				*result = *node[i]
+				*found = true
+			}
+		}
+	} else {
+		for i := 0; !*found && i < len(node); i++ {
+			fmt.Println(node[i].id)
+			if node[i].Link == target {
+				*result = *node[i]
+				*found = true
+			} else {
+				wg.Add(1)
+
+				go func(i int) {
+					mutex.Lock()
+
+					defer wg.Done()
+					ScrapeLink(node[i], target)
+					IDSrecursion(node[i].Children, depth-1, target, found, result, mutex, wg)
+					mutex.Unlock()
+
+				}(i)
+				wg.Wait()
+
+			}
+
+		}
+	}
+}
+
+func IDSRace(node *TreeNode, target string, mutex *sync.Mutex) *TreeNode {
+	if node == nil {
+		return nil
+	}
+	var wg sync.WaitGroup
+
+	result := NewTreeNode("", "")
+	queue := []*TreeNode{node}
+	found := false
+	current := queue[0]
+	ScrapeLink(node, target)
+	for depth := 1; !found; depth++ {
+		if queue[0].Link == target {
+			return queue[0]
+		}
+
+		IDSrecursion(current.Children, depth-1, target, &found, result, mutex, &wg)
+
+	}
+	return result
+}
+
 func main() {
 	startTime := time.Now()
 	// handler := http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
@@ -359,30 +419,31 @@ func main() {
 	// log.Println("Server is available at http://localhost:8000")
 	// log.Fatal(http.ListenAndServe(":8000", handler))
 	var mutex sync.Mutex
-	root := NewTreeNode("", "/wiki/Albert_Einstein")
+	root := NewTreeNode("", "/wiki/ITB")
 	// ScrapeLink(root, "/wiki/Sukarno", &mutex)
 	// for i := 0; i < root.GetNumberOfChildren(); i++ {
 	// 	ScrapeLink(root.Children[i], "/wiki/Sukarno", &mutex)
 	// }
 	// root.PrintNode(3)
-	result := BFSRaceBonus(root, "/wiki/Germany", &mutex)
+	result := BFSRace(root, "/wiki/Computer", &mutex)
+	// result := IDSRace(root, "/wiki/Computer", &mutex)
 	endTime := time.Now()
 	duration := endTime.Sub(startTime)
 	fmt.Println("Duration: ", duration.Seconds(), " s")
 
-	// for result != nil {
-	// 	fmt.Println("Title: ", result.Title)
-	// 	fmt.Println("Link: ", result.Link)
-	// 	result = result.Parent
-	// }
-
-	for i := 0; i < len(result); i++ {
-		fmt.Println("Result ", i+1, " : ")
-		for result[i] != nil {
-			fmt.Println("Title: ", result[i].Title)
-			fmt.Println("Link: ", result[i].Link)
-			result[i] = result[i].Parent
-		}
+	for result != nil {
+		fmt.Println("Title: ", result.Title)
+		fmt.Println("Link: ", result.Link)
+		result = result.Parent
 	}
+
+	// for i := 0; i < len(result); i++ {
+	// 	fmt.Println("Result ", i+1, " : ")
+	// 	for result[i] != nil {
+	// 		fmt.Println("Title: ", result[i].Title)
+	// 		fmt.Println("Link: ", result[i].Link)
+	// 		result[i] = result[i].Parent
+	// 	}
+	// }
 
 }
