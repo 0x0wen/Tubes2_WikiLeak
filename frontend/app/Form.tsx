@@ -11,17 +11,10 @@ import axios from 'axios'
 import get from 'lodash/get'
 import filter from 'lodash/filter'
 import forEach from 'lodash/forEach'
-import debounce from 'lodash/debounce'
 import {WIKIPEDIA_API_URL} from './constants'
 import Image from 'next/image'
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import ResultCard from './ResultCard'
+import {useFormStore, useResultStore} from '@/store/store'
 interface suggestionType {
 	title: string
 	description: string
@@ -29,45 +22,53 @@ interface suggestionType {
 }
 
 const Form = () => {
-	const [isLoading, setIsLoading] = useState<boolean>(false)
-	const [result, setResult] = useState<{time: number} | undefined>()
-	const [startSuggestions, setStartSuggestions] = useState<suggestionType[]>([])
-	const [openStartSuggestions, setStartOpenSuggestions] =
-		useState<boolean>(false)
-	const [goalSuggestions, setGoalSuggestions] = useState<suggestionType[]>([])
-	const [openGoalSuggestions, setGoalOpenSuggestions] = useState<boolean>(false)
-	const [config, setConfig] = useState<{
-		start: string
-		goal: string
-		algorithm: string
-	}>({
-		start: '',
-		goal: '',
-		algorithm: 'IDS',
-	})
+	const {isLoading, result, setResult, setIsLoading} = useResultStore()
+	const {
+		config,
+		setConfig,
+		startSuggestions,
+		setStartSuggestions,
+		goalSuggestions,
+		setGoalSuggestions,
+		openStartSuggestions,
+		setOpenStartSuggestions,
+		openGoalSuggestions,
+		setOpenGoalSuggestions,
+	} = useFormStore()
 	const {toast} = useToast()
 
 	const onClear = (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
 		setConfig({start: '', goal: '', algorithm: 'IDS'})
-		toast({title: 'Form cleared', variant: 'default'})
+		toast({
+			title: '🔎🔥Information cleared🔥🔎',
+			variant: 'default',
+		})
 	}
 	const submitHandler = (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
 		if (config.start === '' || config.goal === '') {
-			toast({title: 'Please fill all the fields', variant: 'destructive'})
+			toast({
+				title: '⚠️💀Information not complete💀⚠️',
+				variant: 'destructive',
+			})
 			return
 		}
 		setIsLoading(true)
 		const element = document.getElementById('result')
 		setTimeout(() => {
-			element?.scrollIntoView({behavior: 'smooth'})
+			scrollTo({top: 500, behavior: 'smooth'})
 		}, 100)
 		console.log(element)
 		setTimeout(() => {
 			setIsLoading(false)
 		}, 2000)
-		setResult({time: 2000})
+		setResult({
+			time: 2000,
+			checkedArticles: 323,
+			passedArticles: 32,
+			path: ['a', 'b', 'c'],
+		})
 	}
 	const onInputChange = async (e: ChangeEvent<HTMLInputElement>) => {
 		const value = e.target.value
@@ -137,10 +138,10 @@ const Form = () => {
 				// items, so remove them via filter().
 				if (id == 'start') {
 					setStartSuggestions(filter(suggestion))
-					setStartOpenSuggestions(true)
+					setOpenStartSuggestions(true)
 				} else {
 					setGoalSuggestions(filter(suggestion))
-					setGoalOpenSuggestions(true)
+					setOpenGoalSuggestions(true)
 				}
 			})
 			.catch((error) => {
@@ -157,7 +158,7 @@ const Form = () => {
 		console.log(startSuggestions)
 	}
 	return (
-		<div className="w-max mx-auto my-auto ">
+		<div className="   w-max	">
 			<form
 				className=" space-y-4 w-full flex flex-col justify-center items-center"
 				onSubmit={submitHandler}
@@ -171,7 +172,7 @@ const Form = () => {
 						placeholder="Title..."
 						value={config.start}
 						onChange={onInputChange}
-						onFocus={() => setGoalOpenSuggestions(false)}
+						onFocus={() => setOpenGoalSuggestions(false)}
 					/>
 					{openStartSuggestions && (
 						<div className="absolute top-16 w-full z-10">
@@ -182,7 +183,7 @@ const Form = () => {
 										className="flex items-center space-x-2 p-2 text-primary bg-primary-foreground hover:bg-slate-200 w-full text-left"
 										onClick={() => {
 											setConfig({...config, start: suggestion.title})
-											setStartOpenSuggestions(false)
+											setOpenStartSuggestions(false)
 										}}
 										type="button"
 									>
@@ -219,7 +220,7 @@ const Form = () => {
 						value={config.goal}
 						className="text-right placeholder:text-right"
 						onChange={onInputChange}
-						onFocus={() => setStartOpenSuggestions(false)}
+						onFocus={() => setOpenStartSuggestions(false)}
 					/>
 					{openGoalSuggestions && (
 						<div className="absolute top-16 w-full z-10">
@@ -230,7 +231,7 @@ const Form = () => {
 										className="flex items-center space-x-2 p-2 text-primary bg-primary-foreground hover:bg-slate-200 w-full text-left"
 										onClick={() => {
 											setConfig({...config, goal: suggestion.title})
-											setGoalOpenSuggestions(false)
+											setOpenGoalSuggestions(false)
 										}}
 										type="button"
 									>
@@ -293,15 +294,6 @@ const Form = () => {
 					</Button>
 				</div>
 			</form>
-			<div id="result">
-				{isLoading ? (
-					<Skeleton className="mt-32 h-96 w-[40rem] rounded-xl mx-auto mb-40" />
-				) : (
-					result && (
-						<div className="mt-32 h-96 w-[40rem] bg-white  mb-40">yessir</div>
-					)
-				)}
-			</div>
 		</div>
 	)
 }
