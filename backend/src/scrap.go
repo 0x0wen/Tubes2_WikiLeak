@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"strings"
 
+	"golang.org/x/net/html"
+
 	"github.com/gocolly/colly/v2"
 )
 
@@ -66,81 +68,90 @@ func isLinkValid(node *TreeNode) bool {
 
 // Format link = /wiki/Title , e.g: /wiki/Albert_Einstein
 
-// func ScrapeLink(node *TreeNode, target string, listLink []*TreeNode) {
-// 	if node.Parent != nil {
-// 		fmt.Println("Scrape : ", node.Parent.Link, "  ", node.Link, "  ", node.id)
-// 	} else {
-// 		fmt.Println("Scrape : ", node.Link, "  ", node.id)
+func ScrapeLink1(node *TreeNode, target string, listLink []*TreeNode) {
+	// if node.Parent != nil {
+	// 	fmt.Println("Scrape : ", node.Parent.Link, "  ", node.Link, "  ", node.id)
+	// } else {
+	// 	fmt.Println("Scrape : ", node.Link, "  ", node.id)
 
-// 	}
-// 	if node.Link[0:6] == "/wiki/" {
-// 		url := "https://en.wikipedia.org" + node.Link
-// 		resp, err := http.Get(url)
-// 		if err != nil {
-// 			fmt.Printf("Error fetching %s: %s\n", url, err)
-// 			return
-// 		}
-// 		defer resp.Body.Close()
+	// }
+	if node.Link[0:6] == "/wiki/" {
+		url := "https://en.wikipedia.org" + node.Link
+		resp, err := http.Get(url)
+		if err != nil {
+			fmt.Printf("Error fetching %s: %s\n", url, err)
+			return
+		}
+		defer resp.Body.Close()
 
-// 		if resp.StatusCode != http.StatusOK {
-// 			fmt.Printf("Failed to fetch %s: %s\n", url, resp.Status)
-// 			return
-// 		}
+		if resp.StatusCode != http.StatusOK {
+			fmt.Printf("Failed to fetch %s: %s\n", url, resp.Status)
+			return
+		}
 
-// 		// Parse the HTML response using streaming
-// 		tokenizer := html.NewTokenizer(resp.Body)
-// 		for {
-// 			tokenType := tokenizer.Next()
-// 			switch tokenType {
-// 			case html.ErrorToken:
-// 				// End of the document, or an error occurred
-// 				return
-// 			case html.StartTagToken, html.SelfClosingTagToken:
-// 				token := tokenizer.Token()
-// 				if token.Data == "a" {
-// 					var link, text string
-// 					isRight := false
-// 					for _, attr := range token.Attr {
-// 						if attr.Key == "href" && len(attr.Val) > 6 {
-// 							if attr.Val[0:6] == "/wiki/" && attr.Val != node.Link {
-// 								link = attr.Val // Store the href attribute value
-// 								isRight = true
-// 								break
-// 							}
+		// Parse the HTML response using streaming
+		tokenizer := html.NewTokenizer(resp.Body)
+		for {
+			tokenType := tokenizer.Next()
+			switch tokenType {
+			case html.ErrorToken:
+				// End of the document, or an error occurred
+				return
+			case html.StartTagToken, html.SelfClosingTagToken:
+				token := tokenizer.Token()
+				if token.Data == "a" {
+					var link, text string
+					isLink := false
+					for _, attr := range token.Attr {
+						if attr.Key == "href" && len(attr.Val) > 6 {
+							if attr.Val[0:6] == "/wiki/" && attr.Val != node.Link {
+								link = attr.Val // Store the href attribute value
+								isLink = true
+								break
+							}
 
-// 						}
-// 					}
-// 					// Get the text content inside the <a> tag
-// 					if isRight {
-// 						tokenType = tokenizer.Next()
-// 						if tokenType == html.TextToken {
-// 							text = tokenizer.Token().Data
-// 						}
-// 						node.AddChild(NewTreeNode(text, link))
-// 						if isAlreadyExist(node.Children[len(node.Children)-1], listLink, target) || !isLinkValid(node.Children[len(node.Children)-1]) {
-// 							removeChild(node, len(node.Children)-1)
-// 						} else {
-// 							listLink = append(listLink, node.Children[len(node.Children)-1])
+						}
+					}
+					// Get the text content inside the <a> tag
+					if isLink {
+						tokenType = tokenizer.Next()
+						if tokenType == html.TextToken {
+							text = strings.TrimSpace(tokenizer.Token().Data)
+						}
+						node.AddChild(NewTreeNode(text, link))
+						if isAlreadyExist(node.Children[len(node.Children)-1], listLink, target) || !isLinkValid(node.Children[len(node.Children)-1]) {
+							removeChild(node, len(node.Children)-1)
+						} else {
+							listLink = append(listLink, node.Children[len(node.Children)-1])
 
-// 						}
-// 					}
+						}
+					}
 
-// 				}
-// 			}
-// 		}
-// 	} else {
-// 		fmt.Println("ERROR: Input link is not valid !")
-// 	}
+				} else if token.Data == "span" {
+					for _, a := range token.Attr {
+						if a.Key == "class" && strings.Contains(a.Val, "mw-page-title-main") {
+							tokenizer.Next()
+							pageTitle := tokenizer.Token().Data
+							node.Title = pageTitle
+							break
+						}
+					}
+				}
+			}
+		}
+	} else {
+		fmt.Println("ERROR: Input link is not valid !")
+	}
 
-// }
+}
 
 func ScrapeLink(node *TreeNode, target string, listLink []*TreeNode) {
-	if node.Parent != nil {
-		fmt.Println("Scrape : ", node.Parent.Link, "  ", node.Link, "  ", node.id)
-	} else {
-		fmt.Println("Scrape : ", node.Link, "  ", node.id)
+	// if node.Parent != nil {
+	// 	fmt.Println("Scrape : ", node.Parent.Link, "  ", node.Link, "  ", node.id)
+	// } else {
+	// 	fmt.Println("Scrape : ", node.Link, "  ", node.id)
 
-	}
+	// }
 	if node.Link[0:6] == "/wiki/" {
 
 		res, err := http.Get("https://en.wikipedia.org" + node.Link)
