@@ -1,5 +1,7 @@
 package main
 
+import "sync"
+
 type Website struct {
 	Link  string
 	Title string
@@ -44,4 +46,22 @@ func NewResultBonus(pathlist [][]Website, pathlength int, pathvisited int, durat
 		Pathvisited: pathvisited,
 		Duration:    duration,
 	}
+}
+
+var (
+	once     sync.Once
+	instance *Singleton
+)
+
+type Singleton struct {
+	Data map[string][]string
+}
+
+func GetInstance() *Singleton {
+	once.Do(func() {
+		instance = &Singleton{
+			Data: make(map[string][]string),
+		}
+	})
+	return instance
 }

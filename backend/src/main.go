@@ -22,7 +22,8 @@ func main() {
 	// root.PrintNode(3)
 	// listLink := []*TreeNode{}
 	// result := BFSRace(root, "/wiki/Computer", listLink)
-	// result := IDSRace(root, "/wiki/Persib_Bandung", listLink, &mutex)
+	// result, length, visit := IDSRace("/wiki/ITB", "/wiki/Sukarno")
+
 	// endTime := time.Now()
 	// duration := endTime.Sub(startTime)
 	// fmt.Println("Duration: ", duration.Seconds(), " s")
@@ -41,6 +42,7 @@ func main() {
 	// 		result[i] = result[i].Parent
 	// 	}
 	// }
-	BFSBonus("/wiki/ITB", "/wiki/Computer")
-
+	IDS("/wiki/ITB", "/wiki/Computer")
+	// 	BFS("/wiki/Albert_Einstein", "/wiki/Germany")
 }
+

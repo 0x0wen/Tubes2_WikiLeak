@@ -27,15 +27,17 @@ func BFSRace(node *TreeNode, target string, listLink []*TreeNode) (*TreeNode, in
 		return node, 1, visit
 	}
 	var iter int
+	cache := NewCache()
+	cache.visited[node.Link] = true
 	for i := 0; !found; i++ {
 		if i == 0 {
 			// mutex.Lock()
-			ScrapeLink(queue[0], target, listLink)
+			ScrapeLink(queue[0], target, cache)
 			queue = append(queue, queue[0].Children...)
 			for j := 0; j < len(queue[0].Children); j++ {
 				visit += 1
 				// if queue[0].Children[j] != nil {
-				// 	fmt.Println("BFS: ", queue[0].Children[j].Parent.Link, " ", queue[0].Children[j].Link, " ", queue[0].Children[j].id)
+				// fmt.Println("BFS: ", queue[0].Children[j].Parent.Link, " ", queue[0].Children[j].Link, " ", queue[0].Children[j].id)
 				// }
 				if queue[0].Children[j].Link == target {
 					return queue[0].Children[j], queue[0].Children[j].id + 1, visit
@@ -50,7 +52,7 @@ func BFSRace(node *TreeNode, target string, listLink []*TreeNode) (*TreeNode, in
 				wg.Add(1)
 				go func(k int) {
 					defer wg.Done()
-					ScrapeLink(queue[k], target, listLink)
+					ScrapeLink(queue[k], target, cache)
 
 				}(k)
 
@@ -97,7 +99,8 @@ func BFSRaceBonus(node *TreeNode, target string, listLink []*TreeNode) ([]*TreeN
 	depth := -1
 	var wg sync.WaitGroup
 	visit := 1
-
+	cache := NewCache()
+	cache.visited[node.Link] = true
 	// fmt.Println("BFS: ", queue[0].Link, " ", queue[0].id)
 	if node.Link == target {
 		if depth == -1 {
@@ -111,7 +114,7 @@ func BFSRaceBonus(node *TreeNode, target string, listLink []*TreeNode) ([]*TreeN
 
 		// 	scraping
 		if i == 0 {
-			ScrapeLink(queue[0], target, listLink)
+			ScrapeLink(queue[0], target, cache)
 			queue = append(queue, queue[0].Children...)
 			for j := 0; j < len(queue[0].Children); j++ {
 				visit += 1
@@ -134,7 +137,7 @@ func BFSRaceBonus(node *TreeNode, target string, listLink []*TreeNode) ([]*TreeN
 				wg.Add(1)
 				go func(k int) {
 					defer wg.Done()
-					ScrapeLink(queue[k], target, listLink)
+					ScrapeLink(queue[k], target, cache)
 
 				}(k)
 
