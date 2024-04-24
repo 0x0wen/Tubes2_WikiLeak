@@ -190,9 +190,9 @@ func ScrapeLink(node *TreeNode, target string, cache *Cache) {
 			colly.AllowedDomains("en.wikipedia.org"),
 		)
 		// Define a callback function to be executed when a link is found
-		c.OnHTML("span.mw-page-title-main", func(e *colly.HTMLElement) {
+		c.OnHTML("h1#firstHeading", func(e *colly.HTMLElement) {
 			// Extract text or any other attribute you want
-			node.Title = e.Text
+			node.Title = strings.TrimSpace(e.DOM.Text())
 		})
 		c.OnHTML("a[href]", func(e *colly.HTMLElement) {
 			// Extract the href attribute of the <a> element

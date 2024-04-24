@@ -26,7 +26,7 @@ func IDSRace(node *TreeNode, target string) (*TreeNode, int, int) {
 		visit = 1
 		queue := []*TreeNode{node}
 		for len(queue) != 0 && !found {
-			iter = min(len(queue), 10)
+			iter = min(len(queue), 100)
 
 			if queue[0].id == 0 {
 				for j := 0; j < len(queue[0].Children); j++ {
@@ -180,7 +180,7 @@ func IDS(pathAwal string, pathAkhir string) Result {
 	result, length, visit := IDSRace(root, pathAkhir)
 	endTime := time.Now()
 	duration := endTime.Sub(startTime)
-	fmt.Println("Duration: ", duration.Seconds(), " s")
+	fmt.Println("Duration: ", duration.Milliseconds(), " ms")
 	fmt.Println("Total Visit: ", visit)
 	fmt.Println("Path lengrh: ", length)
 	var path []Website
@@ -192,7 +192,7 @@ func IDS(pathAwal string, pathAkhir string) Result {
 		fmt.Println("Title: ", path[i].Title)
 		fmt.Println("Link: ", path[i].Link)
 	}
-	return NewResult(path, length, visit, duration.Seconds())
+	return NewResult(path, length, visit, duration.Milliseconds())
 
 }
 func IDSBonus(pathAwal string, pathAkhir string) ResultBonus {
@@ -202,7 +202,7 @@ func IDSBonus(pathAwal string, pathAkhir string) ResultBonus {
 	result, length, visit := IDSRaceBonus(root, pathAkhir)
 	endTime := time.Now()
 	duration := endTime.Sub(startTime)
-	fmt.Println("Duration: ", duration.Seconds(), " s")
+	fmt.Println("Duration: ", duration.Milliseconds(), " ms")
 	fmt.Println("Total Visit: ", visit)
 	fmt.Println("Path lengrh: ", length)
 	var pathList [][]Website
@@ -222,5 +222,5 @@ func IDSBonus(pathAwal string, pathAkhir string) ResultBonus {
 			fmt.Println("Link: ", pathList[i][j].Link)
 		}
 	}
-	return NewResultBonus(pathList, length, visit, duration.Seconds())
+	return NewResultBonus(pathList, length, visit, duration.Milliseconds())
 }

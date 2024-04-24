@@ -206,7 +206,7 @@ func BFS(pathAwal string, pathAkhir string) Result {
 	result, length, visit := BFSRace(root, pathAkhir, listLink)
 	endTime := time.Now()
 	duration := endTime.Sub(startTime)
-	fmt.Println("Duration: ", duration.Seconds(), " s")
+	fmt.Println("Duration: ", duration.Milliseconds(), " ms")
 	fmt.Println("Total Visit: ", visit)
 	fmt.Println("Path lengrh: ", length)
 	var path []Website
@@ -218,7 +218,7 @@ func BFS(pathAwal string, pathAkhir string) Result {
 		fmt.Println("Title: ", path[i].Title)
 		fmt.Println("Link: ", path[i].Link)
 	}
-	return NewResult(path, length, visit, duration.Seconds())
+	return NewResult(path, length, visit, duration.Milliseconds())
 
 }
 
@@ -231,7 +231,7 @@ func BFSBonus(pathAwal string, pathAkhir string) ResultBonus {
 	result, length, visit := BFSRaceBonus(root, pathAkhir, listLink)
 	endTime := time.Now()
 	duration := endTime.Sub(startTime)
-	fmt.Println("Duration: ", duration.Seconds(), " s")
+	fmt.Println("Duration: ", duration.Milliseconds(), " ms")
 	fmt.Println("Total Visit: ", visit)
 	fmt.Println("Path lengrh: ", length)
 	var pathList [][]Website
@@ -251,5 +251,5 @@ func BFSBonus(pathAwal string, pathAkhir string) ResultBonus {
 			fmt.Println("Link: ", pathList[i][j].Link)
 		}
 	}
-	return NewResultBonus(pathList, length, visit, duration.Seconds())
+	return NewResultBonus(pathList, length, visit, duration.Milliseconds())
 }
