@@ -7,6 +7,7 @@ import (
 )
 
 // return node, panjang path, jumlah web yang diperiksa
+
 func BFSRace(node *TreeNode, target string, listLink []*TreeNode) (*TreeNode, int, int) {
 	// Request the HTML page.
 	if node == nil {
@@ -18,7 +19,6 @@ func BFSRace(node *TreeNode, target string, listLink []*TreeNode) (*TreeNode, in
 
 	// Perform BFS
 	found := false
-	j := 0
 	var wg sync.WaitGroup
 	// jumlah web yang diperiksa
 
@@ -29,8 +29,8 @@ func BFSRace(node *TreeNode, target string, listLink []*TreeNode) (*TreeNode, in
 	var iter int
 	cache := NewCache()
 	cache.visited[node.Link] = true
-	for i := 0; !found; i++ {
-		if i == 0 {
+	for !found {
+		if queue[len(queue)-1].id == 0 {
 			// mutex.Lock()
 			ScrapeLink(queue[0], target, cache)
 			queue = append(queue, queue[0].Children...)
@@ -44,11 +44,11 @@ func BFSRace(node *TreeNode, target string, listLink []*TreeNode) (*TreeNode, in
 				}
 			}
 			// mutex.Unlock()
-			iter = min(len(queue[0].Children), 10)
-		} else if len(queue)-i < iter {
-
+			queue = queue[1:]
+		} else {
+			iter = min(len(queue), 150)
 			// if j*17+18 < len(queue) {
-			for k := j*iter + 1; k < j*iter+iter+1 && !found; k++ {
+			for k := 0; k < iter && !found; k++ {
 				wg.Add(1)
 				go func(k int) {
 					defer wg.Done()
@@ -59,7 +59,7 @@ func BFSRace(node *TreeNode, target string, listLink []*TreeNode) (*TreeNode, in
 			}
 			wg.Wait()
 
-			for k := j*iter + 1; k < j*iter+iter+1; k++ {
+			for k := 0; k < iter; k++ {
 				// mutex.Lock()
 
 				queue = append(queue, queue[k].Children...)
@@ -74,7 +74,7 @@ func BFSRace(node *TreeNode, target string, listLink []*TreeNode) (*TreeNode, in
 				}
 
 			}
-			j += 1
+			queue = queue[iter:]
 
 		}
 
@@ -95,7 +95,6 @@ func BFSRaceBonus(node *TreeNode, target string, listLink []*TreeNode) ([]*TreeN
 	result := []*TreeNode{}
 
 	// Perform BFS
-	j := 0
 	depth := -1
 	var wg sync.WaitGroup
 	visit := 1
@@ -113,7 +112,7 @@ func BFSRaceBonus(node *TreeNode, target string, listLink []*TreeNode) ([]*TreeN
 		// Dequeue a node from the front of the queue
 
 		// 	scraping
-		if i == 0 {
+		if queue[len(queue)-1].id == 0 {
 			ScrapeLink(queue[0], target, cache)
 			queue = append(queue, queue[0].Children...)
 			for j := 0; j < len(queue[0].Children); j++ {
@@ -128,12 +127,13 @@ func BFSRaceBonus(node *TreeNode, target string, listLink []*TreeNode) ([]*TreeN
 
 				}
 			}
-			iter = min(len(queue[0].Children), 20)
-		} else if len(queue)-i <= iter {
+			queue = queue[1:]
+		} else {
+			iter = min(len(queue[0].Children), 150)
 
 			// if j*30+31 < len(queue) {
 
-			for k := j*iter + 1; k < j*iter+iter+1; k++ {
+			for k := 0; k < iter; k++ {
 				wg.Add(1)
 				go func(k int) {
 					defer wg.Done()
@@ -144,7 +144,7 @@ func BFSRaceBonus(node *TreeNode, target string, listLink []*TreeNode) ([]*TreeN
 			}
 			wg.Wait()
 
-			for k := iter*j + 1; k < j*iter+iter+1; k++ {
+			for k := 0; k < iter; k++ {
 				queue = append(queue, queue[k].Children...)
 				for j := 0; j < len(queue[k].Children); j++ {
 					visit += 1
@@ -160,7 +160,7 @@ func BFSRaceBonus(node *TreeNode, target string, listLink []*TreeNode) ([]*TreeN
 				}
 
 			}
-			j += 1
+			queue = queue[iter:]
 
 			// }
 			// } else {

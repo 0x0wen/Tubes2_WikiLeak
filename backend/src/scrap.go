@@ -1,13 +1,15 @@
 package main
 
 import (
-	"log"
-	"net/http"
+	"fmt"
 	"strings"
 	"sync"
 
 	"github.com/gocolly/colly/v2"
+	"github.com/gocolly/colly/v2/queue"
 )
+
+var mapCache sync.Map
 
 type Cache struct {
 	mu      sync.Mutex
@@ -165,30 +167,45 @@ func isLinkValid(node *TreeNode) bool {
 // 	}
 
 // }
+var scrap = 0
 
 func ScrapeLink(node *TreeNode, target string, cache *Cache) {
-	// if node.Parent != nil {
-	// 	fmt.Println("Scrape : ", node.Parent.Link, "  ", node.Link, "  ", node.id)
-	// } else {
-	// 	fmt.Println("Scrape : ", node.Link, "  ", node.id)
+	scrap += 1
+	if node.Parent != nil {
+		fmt.Println("Scrape ", scrap, ": ", node.Parent.Link, "  ", node.Link, "  ", node.id)
+	} else {
+		fmt.Println("Scrape ", scrap, ": ", node.Link, "  ", node.id)
 
-	// }
+	}
 	if node.Link[0:6] == "/wiki/" {
 
-		res, err := http.Get("https://en.wikipedia.org" + node.Link)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer res.Body.Close()
-		if res.StatusCode != 200 {
-			// log.Fatal("status code error: %d %s", res.StatusCode, res.Status)
+		// res, err := http.Get("https://en.wikipedia.org" + node.Link)
+		// if err != nil {
+		// 	log.Fatal(err)
+		// }
+		// defer res.Body.Close()
+		// if res.StatusCode != 200 {
+		// 	// log.Fatal("status code error: %d %s", res.StatusCode, res.Status)
+		// 	return
+		// }
+		if value, ok := mapCache.Load(node.Link); ok {
+			for i := 0; i < len(value.([]*TreeNode)); i++ {
+				node.AddChild(NewTreeNode(value.([]*TreeNode)[i].Title, value.([]*TreeNode)[i].Link))
+			}
 			return
 		}
-		// Create a new Collector with concurrency settings
 		c := colly.NewCollector(
-			// colly.Async(true),
 			colly.AllowedDomains("en.wikipedia.org"),
+			// colly.Async(true),
 		)
+
+		q, _ := queue.New(
+			15, // Number of consumer threads
+			&queue.InMemoryQueueStorage{MaxSize: 200}, // Use in-memory queue storage
+		)
+
+		q.AddURL("https://en.wikipedia.org" + node.Link)
+
 		// Define a callback function to be executed when a link is found
 		c.OnHTML("h1#firstHeading", func(e *colly.HTMLElement) {
 			// Extract text or any other attribute you want
@@ -219,13 +236,11 @@ func ScrapeLink(node *TreeNode, target string, cache *Cache) {
 
 		// Define a callback function to be executed when the scraping is complete
 		c.OnScraped(func(r *colly.Response) {
-			// fmt.Println("Scraping finished for", r.Request.URL.String())
+			if _, ok := mapCache.Load(node.Link); ok {
+				mapCache.Store(node.Link, node.Children)
+			}
 		})
+		q.Run(c)
 
-		// Start scraping by visiting the URL
-		c.Visit("https://en.wikipedia.org" + node.Link)
-
-		// Wait for scraping to finish
-		c.Wait()
 	}
 }

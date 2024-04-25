@@ -26,7 +26,7 @@ func IDSRace(node *TreeNode, target string) (*TreeNode, int, int) {
 		visit = 1
 		queue := []*TreeNode{node}
 		for len(queue) != 0 && !found {
-			iter = min(len(queue), 100)
+			iter = min(len(queue), 150)
 
 			if queue[0].id == 0 {
 				for j := 0; j < len(queue[0].Children); j++ {
@@ -107,7 +107,7 @@ func IDSRaceBonus(node *TreeNode, target string) ([]*TreeNode, int, int) {
 		visit = 1
 		queue := []*TreeNode{node}
 		for len(queue) != 0 && !found {
-			iter = min(len(queue), 20)
+			iter = min(len(queue), 150)
 
 			if queue[0].id == 0 {
 				for j := 0; j < len(queue[0].Children); j++ {

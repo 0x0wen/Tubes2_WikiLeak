@@ -9,7 +9,6 @@ import (
 )
 
 func main() {
-
 	// Create an HTTP handler
 	handler := http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		// Allow requests from any origin
@@ -53,7 +52,7 @@ func main() {
 
 		// Now you can use requestData.Start and requestData.Goal in your backend logic
 		log.Printf("Start: %s, Goal: %s, Algorithm: %s\n", requestData.Start, requestData.Goal, requestData.Algorithm)
-		
+
 		type ResponseData struct {
 			Status string `json:"status"`
 			Result Result `json:"result"`
