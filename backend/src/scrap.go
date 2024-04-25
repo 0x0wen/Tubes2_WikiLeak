@@ -167,14 +167,12 @@ func isLinkValid(node *TreeNode) bool {
 // 	}
 
 // }
-var scrap = 0
 
 func ScrapeLink(node *TreeNode, target string, cache *Cache) {
-	scrap += 1
 	if node.Parent != nil {
-		fmt.Println("Scrape ", scrap, ": ", node.Parent.Link, "  ", node.Link, "  ", node.id)
+		fmt.Println("Scrape :", node.Parent.Link, "  ", node.Link, "  ", node.id)
 	} else {
-		fmt.Println("Scrape ", scrap, ": ", node.Link, "  ", node.id)
+		fmt.Println("Scrape : ", node.Link, "  ", node.id)
 
 	}
 	if node.Link[0:6] == "/wiki/" {
@@ -189,10 +187,13 @@ func ScrapeLink(node *TreeNode, target string, cache *Cache) {
 		// 	return
 		// }
 		if value, ok := mapCache.Load(node.Link); ok {
-			for i := 0; i < len(value.([]*TreeNode)); i++ {
-				node.AddChild(NewTreeNode(value.([]*TreeNode)[i].Title, value.([]*TreeNode)[i].Link))
+			if value != nil {
+				for i := 0; i < len(value.([]*TreeNode)); i++ {
+					node.AddChild(NewTreeNode(value.([]*TreeNode)[i].Title, value.([]*TreeNode)[i].Link))
+				}
+				return
 			}
-			return
+
 		}
 		c := colly.NewCollector(
 			colly.AllowedDomains("en.wikipedia.org"),
@@ -236,7 +237,7 @@ func ScrapeLink(node *TreeNode, target string, cache *Cache) {
 
 		// Define a callback function to be executed when the scraping is complete
 		c.OnScraped(func(r *colly.Response) {
-			if _, ok := mapCache.Load(node.Link); ok {
+			if _, ok := mapCache.Load(node.Link); !ok {
 				mapCache.Store(node.Link, node.Children)
 			}
 		})
