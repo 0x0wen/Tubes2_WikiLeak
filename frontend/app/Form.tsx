@@ -40,7 +40,7 @@ const Form = () => {
 
 	const onClear = (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
-		setConfig({start: '', goal: '', algorithm: 'IDS'})
+		setConfig({start: '', goal: '', algorithm: 'IDS', solution: 'First'})
 		toast({
 			title: '🔎🔥Information cleared🔥🔎',
 			variant: 'default',
@@ -55,9 +55,10 @@ const Form = () => {
 			})
 			return
 		}
+		console.log(config)
 		setIsLoading(true)
 		setTimeout(() => {
-			scrollTo({top: 1000, behavior: 'smooth'})
+			scrollTo({top: 700, behavior: 'smooth'})
 		}, 100)
 		const body = {
 			...config,
@@ -90,7 +91,7 @@ const Form = () => {
 			.finally(() => {
 				setIsLoading(false)
 			})
-			
+
 		setTimeout(() => {}, 2000)
 	}
 	const onInputChange = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -101,6 +102,7 @@ const Form = () => {
 		} else {
 			setConfig({...config, goal: e.target.value})
 		}
+
 		const queryParams = {
 			action: 'query',
 			format: 'json',
@@ -288,27 +290,48 @@ const Form = () => {
 						</div>
 					)}
 				</div>
-				<div>
-					<Label htmlFor="algorithm">Algorithm</Label>
-					<RadioGroup
-						id="algorithm"
-						defaultValue="IDS"
-						className="flex w-full justify-center py-4"
-						onChange={(e: ChangeEvent<HTMLInputElement>) =>
-							setConfig({...config, algorithm: e.target.value})
-						}
-					>
-						<div className="flex items-center space-x-2">
-							<RadioGroupItem value="IDS" id="r1" />
-							<Label htmlFor="r1">IDS</Label>
-						</div>
-						<div className="flex items-center space-x-2">
-							<RadioGroupItem value="BFS" id="r2" />
-							<Label htmlFor="r2">BFS</Label>
-						</div>
-					</RadioGroup>
+				<div className="space-y-4 pt-2 pb-6 w-full">
+					<div className="flex justify-between items-center w-full">
+						<Label htmlFor="algorithm">Algorithm: </Label>
+						<RadioGroup
+							id="algorithm"
+							defaultValue="BFS"
+							className="flex w-full justify-end"
+							onChange={(e: ChangeEvent<HTMLInputElement>) =>
+								setConfig({...config, algorithm: e.target.value})
+							}
+						>
+							<div className="flex items-center space-x-2">
+								<RadioGroupItem value="IDS" id="r1" />
+								<Label htmlFor="r1">IDS</Label>
+							</div>
+							<div className="flex items-center space-x-2">
+								<RadioGroupItem value="BFS" id="r2" />
+								<Label htmlFor="r2">BFS</Label>
+							</div>
+						</RadioGroup>
+					</div>
+					<div className="flex justify-between items-center w-full">
+						<Label htmlFor="solution">Solution: </Label>
+						<RadioGroup
+							id="solution"
+							defaultValue="First"
+							className="flex w-full justify-end"
+							onChange={(e: ChangeEvent<HTMLInputElement>) =>
+								setConfig({...config, solution: e.target.value})
+							}
+						>
+							<div className="flex items-center space-x-2">
+								<RadioGroupItem value="First" id="s1" />
+								<Label htmlFor="s1">First</Label>
+							</div>
+							<div className="flex items-center space-x-2">
+								<RadioGroupItem value="All" id="s2" />
+								<Label htmlFor="s2">All</Label>
+							</div>
+						</RadioGroup>
+					</div>
 				</div>
-
 				<div className="flex gap-4 justify-center">
 					<Button className="w-32" type="reset">
 						Clear

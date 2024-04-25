@@ -1,5 +1,6 @@
 import Form from './Form'
 import ParticlesBackground from './ParticlesBackground'
+import Result from './Result'
 import ResultCard from './ResultCard'
 const Page = () => {
 	return (
@@ -22,9 +23,7 @@ const Page = () => {
 						<Form />
 					</div>
 				</section>
-				<div className="w-full min-h-screen z-50 flex justify-center items-center">
-					<ResultCard />
-				</div>
+				<Result />
 			</main>
 		</>
 	)
