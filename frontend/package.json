@@ -40,14 +40,9 @@
     "zustand": "^4.5.2"
   },
   "devDependencies": {
-<<<<<<< HEAD
-    "@types/node": "20.12.7",
-    "@types/react": "18.2.79",
-=======
     "@types/lodash": "^4.17.0",
     "@types/node": "^20",
     "@types/react": "^18",
->>>>>>> 03751c7c3e0798cdbcc6fd1cac2221ba388b08ae
     "@types/react-dom": "^18",
     "autoprefixer": "^10.0.1",
     "eslint": "^8",
