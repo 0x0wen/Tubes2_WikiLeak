@@ -7,6 +7,11 @@ interface suggestionType {
     thumbnailUrl: string;
 }
 
+interface PathType {
+    Link: string;
+    Title: string;
+}
+
 interface FormState {
     startSuggestions: suggestionType[];
     goalSuggestions: suggestionType[];
@@ -22,16 +27,16 @@ interface FormState {
 
 interface ResultState {
     isLoading: boolean;
-    result: { time: number; checkedArticles: number; passedArticles: number; path: string[] };
+    result: { time: number; checkedArticles: number; passedArticles: number; path: PathType[] } | null;
     setIsLoading: (isLoading: boolean) => void;
-    setResult: (result: { time: number; checkedArticles: number; passedArticles: number; path: string[] }) => void;
+    setResult: (result: { time: number; checkedArticles: number; passedArticles: number; path: PathType[] }) => void;
 }   
 
 
 
 export const useResultStore = create<ResultState>((set) => ({
     isLoading: false,
-    result: {time: 0, checkedArticles: 0, passedArticles: 0,path:[]},
+    result: null,
     setIsLoading: (isLoading) => set({ isLoading }),
     setResult: (result) => set({ result }),
 }));

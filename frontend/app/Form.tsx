@@ -15,6 +15,7 @@ import {WIKIPEDIA_API_URL} from './constants'
 import Image from 'next/image'
 import ResultCard from './ResultCard'
 import {useFormStore, useResultStore} from '@/store/store'
+import danger from '@/public/assets/danger.png'
 interface suggestionType {
 	title: string
 	description: string
@@ -45,7 +46,7 @@ const Form = () => {
 			variant: 'default',
 		})
 	}
-	const submitHandler = (e: FormEvent<HTMLFormElement>) => {
+	const submitHandler = async (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
 		if (config.start === '' || config.goal === '') {
 			toast({
@@ -55,20 +56,42 @@ const Form = () => {
 			return
 		}
 		setIsLoading(true)
-		const element = document.getElementById('result')
 		setTimeout(() => {
-			scrollTo({top: 500, behavior: 'smooth'})
+			scrollTo({top: 1000, behavior: 'smooth'})
 		}, 100)
-		console.log(element)
-		setTimeout(() => {
-			setIsLoading(false)
-		}, 2000)
-		setResult({
-			time: 2000,
-			checkedArticles: 323,
-			passedArticles: 32,
-			path: ['a', 'b', 'c'],
+		const body = {
+			...config,
+			start: `/wiki/${config.start.replace(/ /g, '_')}`,
+			goal: `/wiki/${config.goal.replace(/ /g, '_')}`,
+		}
+		await axios({
+			method: 'post',
+			url: 'http://localhost:8000',
+			data: body,
 		})
+			.then((response) => {
+				const result = response.data.result
+
+				setResult({
+					time: result.Duration,
+					checkedArticles: result.Pathvisited,
+					passedArticles: result.Pathlength,
+					path: result.Path,
+				})
+				console.log(response.data.result)
+			})
+			.catch((error) => {
+				console.log(error)
+				toast({
+					title: '🔥🔥Error occured🔥🔥',
+					variant: 'destructive',
+				})
+			})
+			.finally(() => {
+				setIsLoading(false)
+			})
+			
+		setTimeout(() => {}, 2000)
 	}
 	const onInputChange = async (e: ChangeEvent<HTMLInputElement>) => {
 		const value = e.target.value
@@ -155,7 +178,6 @@ const Form = () => {
 				// 	exFatal: false,
 				// })
 			})
-		console.log(startSuggestions)
 	}
 	return (
 		<div className="   w-max	">
@@ -188,7 +210,11 @@ const Form = () => {
 										type="button"
 									>
 										<Image
-											src={suggestion.thumbnailUrl}
+											src={
+												suggestion.thumbnailUrl
+													? suggestion.thumbnailUrl
+													: danger
+											}
 											alt={suggestion.title}
 											className="w-8 h-8  object-cover"
 											width={50}
@@ -236,7 +262,11 @@ const Form = () => {
 										type="button"
 									>
 										<Image
-											src={suggestion.thumbnailUrl}
+											src={
+												suggestion.thumbnailUrl
+													? suggestion.thumbnailUrl
+													: danger
+											}
 											alt={suggestion.title}
 											className="w-8 h-8 object-cover"
 											width={50}
