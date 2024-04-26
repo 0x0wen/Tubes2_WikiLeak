@@ -1,20 +1,17 @@
 'use client'
-import {Button} from '@/components/ui/button'
+// @ts-ignore
 import {
 	Card,
 	CardContent,
 	CardDescription,
-	CardFooter,
 	CardHeader,
 	CardTitle,
 } from '@/components/ui/card'
-import {Label} from '@/components/ui/label'
-import {TypographyP} from '@/components/ui/typography'
-import {useResultStore} from '@/store/store'
+import {PathType, useResultStore} from '@/store/store'
 import pikachu from '@/public/assets/pikachu.gif'
 import Image from 'next/image'
 import {Separator} from '@/components/ui/separator'
-import {isBonusPath} from './functions'
+import {isRegularPath} from './functions'
 const ResultCard = () => {
 	const {isLoading, result, setIsLoading} = useResultStore()
 	return (
@@ -26,7 +23,7 @@ const ResultCard = () => {
 				</div>
 			) : (
 				result &&
-				(!isBonusPath(result.path) ? (
+				(isRegularPath(result.path[0]) ? (
 					<div className="min-h-screen flex justify-center items-center">
 						<Card className="w-[350px] bg-primary text-primary-foreground text-center ">
 							<CardHeader>
@@ -91,16 +88,18 @@ const ResultCard = () => {
 															: '🔟'}
 													</p>
 													<a
-														href={`https://en.wikipedia.org${path.Link}`}
+														href={`https://en.wikipedia.org${
+															(path as PathType).Link
+														}`}
 														target="_blank"
 														className="text-primary-foreground hover:underline text-sm w-full font-medium leading-none"
 													>
-														{path.Title
-															? path.Title
-															: path.Link.replace('/wiki/', '').replace(
-																	/_/g,
-																	' '
-															  )}
+														{(path as PathType).Title
+															? (path as PathType).Title
+															: (path as PathType).Link.replace(
+																	'/wiki/',
+																	''
+															  ).replace(/_/g, ' ')}
 													</a>
 												</div>
 												{index + 1 !== result?.path.length && <Separator />}
@@ -152,9 +151,9 @@ const ResultCard = () => {
 							</CardContent>
 						</Card>
 						<div className="grid grid-cols-3 py-10 gap-10">
-							{result?.path.map((path, index) => (
+							{result?.path.map((solutions, index) => (
 								<div className="flex flex-col rounded-xl border border-white ">
-									{path?.paths.map((path, index) => (
+									{(solutions as PathType[]).map((solution, index) => (
 										<div key={index}>
 											<div className=" grid grid-cols-[25px_1fr] items-center p-4  text-primary-foreground ">
 												<p>
@@ -179,13 +178,13 @@ const ResultCard = () => {
 														: '🔟'}
 												</p>
 												<a
-													href={`https://en.wikipedia.org${path.Link}`}
+													href={`https://en.wikipedia.org${solution.Link}`}
 													target="_blank"
 													className="text-primary-foreground hover:underline text-sm w-full font-medium leading-none"
 												>
-													{path.Title
-														? path.Title
-														: path.Link.replace('/wiki/', '').replace(
+													{solution.Title
+														? solution.Title
+														: solution.Link.replace('/wiki/', '').replace(
 																/_/g,
 																' '
 														  )}

@@ -18,7 +18,7 @@ type Result struct {
 
 // List of List of path (khusus bonus)
 type ResultBonus struct {
-	PathList    [][]Website
+	Path    [][]Website
 	Pathlength  int
 	Pathvisited int
 	Duration    int64
@@ -43,7 +43,7 @@ func NewResult(path []Website, pathlength int, pathvisited int, duration int64) 
 
 func NewResultBonus(pathlist [][]Website, pathlength int, pathvisited int, duration int64) ResultBonus {
 	return ResultBonus{
-		PathList:    pathlist,
+		Path:    pathlist,
 		Pathlength:  pathlength,
 		Pathvisited: pathvisited,
 		Duration:    duration,

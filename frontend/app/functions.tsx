@@ -1,7 +1,5 @@
-import {PathType, BonusPathType} from '@/store/store'
+import {PathType} from '@/store/store'
 
-export function isBonusPath(
-	path: BonusPathType[] | PathType[]
-): path is BonusPathType[] {
-	return (path as BonusPathType[])[0].paths !== undefined
+export function isRegularPath(path: PathType | PathType[]): path is PathType {
+	return !Array.isArray(path) && (path as PathType).Title !== undefined
 }
