@@ -23,6 +23,7 @@ func BFSRace(node *TreeNode, target string, listLink []*TreeNode) (*TreeNode, in
 	// jumlah web yang diperiksa
 
 	visit := 1
+	node.Title = getTitle(node.Link)
 	if node.Link == target {
 		return node, 1, visit
 	}
@@ -51,7 +52,7 @@ func BFSRace(node *TreeNode, target string, listLink []*TreeNode) (*TreeNode, in
 			}
 			// mutex.Unlock()
 		} else {
-			iter = min(len(queue), 200)
+			iter = min(len(queue), 150)
 			// if j*17+18 < len(queue) {
 			for k := 0; k < iter && !found; k++ {
 				wg.Add(1)
@@ -94,6 +95,7 @@ func BFSRaceBonus(node *TreeNode, target string, listLink []*TreeNode) ([]*TreeN
 	if node == nil {
 		return nil, 0, 0
 	}
+	node.Title = getTitle(node.Link)
 
 	// Create a queue for BFS
 	queue := []*TreeNode{node}
@@ -136,7 +138,7 @@ func BFSRaceBonus(node *TreeNode, target string, listLink []*TreeNode) ([]*TreeN
 			}
 			queue = queue[1:]
 		} else {
-			iter = min(len(queue), 300)
+			iter = min(len(queue), 150)
 
 			// if j*30+31 < len(queue) {
 
@@ -219,13 +221,21 @@ func BFS(pathAwal string, pathAkhir string) Result {
 	fmt.Println("Total Visit: ", visit)
 	fmt.Println("Path lengrh: ", length)
 	var path []Website
+	temp := result
+	for temp != nil {
+		temp.Title = getTitle(temp.Link)
+		temp.imagePath = getImage(temp.Link)
+		temp = temp.Parent
+	}
 	for result != nil {
-		path = append([]Website{NewWebsite(result.Link, getTitle(result.Link), getImage(result.Link))}, path...)
+
+		path = append([]Website{NewWebsite(result.Link, result.Title, result.imagePath)}, path...)
 		result = result.Parent
 	}
 	for i := 0; i < len(path); i++ {
 		fmt.Println("Title: ", path[i].Title)
 		fmt.Println("Link: ", path[i].Link)
+		fmt.Println("Img: ", path[i].Imagepath)
 	}
 	return NewResult(path, length, visit, duration.Milliseconds())
 
@@ -243,11 +253,29 @@ func BFSBonus(pathAwal string, pathAkhir string) ResultBonus {
 	fmt.Println("Duration: ", duration.Milliseconds(), " ms")
 	fmt.Println("Total Visit: ", visit)
 	fmt.Println("Path lengrh: ", length)
+	var wg sync.WaitGroup
 	var pathList [][]Website
+	for i := 0; i < len(result); i++ {
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+
+			temp := result[i]
+			for temp != nil {
+
+				temp.Title = getTitle(temp.Link)
+				temp.imagePath = getImage(temp.Link)
+				temp = temp.Parent
+			}
+		}(i)
+
+	}
+	wg.Wait()
 	for i := 0; i < len(result); i++ {
 		path := []Website{}
 		for result[i] != nil {
-			path = append([]Website{NewWebsite(result[i].Link, getTitle(result[i].Link), getImage(result[i].Link))}, path...)
+
+			path = append([]Website{NewWebsite(result[i].Link, result[i].Title, result[i].imagePath)}, path...)
 			result[i] = result[i].Parent
 		}
 		pathList = append(pathList, path)
@@ -258,6 +286,7 @@ func BFSBonus(pathAwal string, pathAkhir string) ResultBonus {
 		for j := 0; j < len(pathList[i]); j++ {
 			fmt.Println("Title: ", pathList[i][j].Title)
 			fmt.Println("Link: ", pathList[i][j].Link)
+			fmt.Println("Image: ", pathList[i][j].Imagepath)
 		}
 	}
 	return NewResultBonus(pathList, length, visit, duration.Milliseconds())
