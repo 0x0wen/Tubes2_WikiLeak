@@ -83,16 +83,15 @@ func getImage(link string) string {
 			src = e.Attr("src")
 		}
 		found = true
-	})	
-		
+	})
+
 	c.OnScraped(func(r *colly.Response) {
 		// fmt.Println("Scraping finished for", r.Request.URL.String())
 
 	})
 	q.Run(c)
 
-	return img
-
+	return src
 }
 func getTitle(link string) string {
 	// Instantiate a new collector
