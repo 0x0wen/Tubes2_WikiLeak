@@ -206,7 +206,7 @@ const ResultCard = () => {
 														  )}
 												</a>
 											</div>
-											{index + 1 !== result?.path.length && <Separator />}
+											{index + 1 !== solutions.length && <Separator />}
 										</div>
 									))}
 								</div>
