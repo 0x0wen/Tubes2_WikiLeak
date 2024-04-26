@@ -32,21 +32,26 @@ func BFSRace(node *TreeNode, target string, listLink []*TreeNode) (*TreeNode, in
 	for !found {
 		if queue[len(queue)-1].id == 0 {
 			// mutex.Lock()
-			ScrapeLink(queue[0], target, cache)
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				ScrapeLink(queue[0], target, cache)
+			}()
+			wg.Wait()
 			queue = append(queue, queue[0].Children...)
-			for j := 0; j < len(queue[0].Children); j++ {
+			queue = queue[1:]
+			for j := 0; j < len(queue); j++ {
 				visit += 1
 				// if queue[0].Children[j] != nil {
-				// fmt.Println("BFS: ", queue[0].Children[j].Parent.Link, " ", queue[0].Children[j].Link, " ", queue[0].Children[j].id)
+				fmt.Println("BFS ", visit, " : ", queue[j].Parent.Link, " ", queue[j].Link, " ", queue[j].id)
 				// }
-				if queue[0].Children[j].Link == target {
-					return queue[0].Children[j], queue[0].Children[j].id + 1, visit
+				if queue[j].Link == target {
+					return queue[j], queue[j].id + 1, visit
 				}
 			}
 			// mutex.Unlock()
-			queue = queue[1:]
 		} else {
-			iter = min(len(queue), 150)
+			iter = min(len(queue), 200)
 			// if j*17+18 < len(queue) {
 			for k := 0; k < iter && !found; k++ {
 				wg.Add(1)
@@ -66,7 +71,7 @@ func BFSRace(node *TreeNode, target string, listLink []*TreeNode) (*TreeNode, in
 				for j := 0; j < len(queue[k].Children); j++ {
 					visit += 1
 					// if queue[k].Children[j] != nil {
-					// 	fmt.Println("BFS: ", queue[k].Parent.Link, " ", queue[k].Children[j].Link, " ", queue[k].Children[j].id)
+					fmt.Println("BFS ", visit, " : ", queue[k].Link, " ", queue[k].Children[j].Link, " ", queue[k].Children[j].id)
 					// }
 					if queue[k].Children[j].Link == target {
 						return queue[k].Children[j], queue[k].Children[j].id + 1, visit
@@ -100,7 +105,7 @@ func BFSRaceBonus(node *TreeNode, target string, listLink []*TreeNode) ([]*TreeN
 	visit := 1
 	cache := NewCache()
 	cache.visited[node.Link] = true
-	// fmt.Println("BFS: ", queue[0].Link, " ", queue[0].id)
+	fmt.Println("BFS: ", queue[0].Link, " ", queue[0].id)
 	if node.Link == target {
 		if depth == -1 {
 			depth = node.id
@@ -117,19 +122,21 @@ func BFSRaceBonus(node *TreeNode, target string, listLink []*TreeNode) ([]*TreeN
 			queue = append(queue, queue[0].Children...)
 			for j := 0; j < len(queue[0].Children); j++ {
 				visit += 1
-				// fmt.Println("BFS: ", queue[0].Link, " ", queue[0].Children[j].Link, " ", queue[0].Children[j].id)
+				fmt.Println("BFS ", visit, " : ", queue[0].Link, " ", queue[0].Children[j].Link, " ", queue[0].Children[j].id)
 				if queue[0].Children[j].Link == target {
 					// Modify the title of the target node
 					if depth == -1 {
 						depth = queue[0].Children[j].id
 					}
-					result = append(result, queue[0].Children[j])
+					if !solutionAlreadyExist(queue[0].Children[j], result) {
+						result = append(result, queue[0].Children[j])
+					}
 
 				}
 			}
 			queue = queue[1:]
 		} else {
-			iter = min(len(queue[0].Children), 150)
+			iter = min(len(queue), 300)
 
 			// if j*30+31 < len(queue) {
 
@@ -146,15 +153,17 @@ func BFSRaceBonus(node *TreeNode, target string, listLink []*TreeNode) ([]*TreeN
 
 			for k := 0; k < iter; k++ {
 				queue = append(queue, queue[k].Children...)
-				for j := 0; j < len(queue[k].Children); j++ {
+				for j := 0; j < len(queue[k].Children) && (depth == -1 || depth > queue[k].id); j++ {
 					visit += 1
-					// fmt.Println("BFS: ", queue[k].Link, " ", queue[k].Children[j].Link, " ", queue[k].Children[j].id)
+					fmt.Println("BFS ", visit, " : ", queue[k].Link, " ", queue[k].Children[j].Link, " ", queue[k].Children[j].id)
 					if queue[k].Children[j].Link == target {
 						// Modify the title of the target node
 						if depth == -1 {
 							depth = queue[k].Children[j].id
 						}
-						result = append(result, queue[k].Children[j])
+						if !solutionAlreadyExist(queue[k].Children[j], result) {
+							result = append(result, queue[k].Children[j])
+						}
 
 					}
 				}
@@ -211,7 +220,7 @@ func BFS(pathAwal string, pathAkhir string) Result {
 	fmt.Println("Path lengrh: ", length)
 	var path []Website
 	for result != nil {
-		path = append([]Website{NewWebsite(result.Link, result.Title)}, path...)
+		path = append([]Website{NewWebsite(result.Link, getTitle(result.Link), getImage(result.Link))}, path...)
 		result = result.Parent
 	}
 	for i := 0; i < len(path); i++ {
@@ -238,7 +247,7 @@ func BFSBonus(pathAwal string, pathAkhir string) ResultBonus {
 	for i := 0; i < len(result); i++ {
 		path := []Website{}
 		for result[i] != nil {
-			path = append([]Website{NewWebsite(result[i].Link, result[i].Title)}, path...)
+			path = append([]Website{NewWebsite(result[i].Link, getTitle(result[i].Link), getImage(result[i].Link))}, path...)
 			result[i] = result[i].Parent
 		}
 		pathList = append(pathList, path)

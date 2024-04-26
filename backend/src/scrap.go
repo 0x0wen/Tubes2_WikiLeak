@@ -1,7 +1,8 @@
 package main
 
 import (
-	"fmt"
+	"log"
+	"net/http"
 	"strings"
 	"sync"
 
@@ -33,7 +34,20 @@ func (c *Cache) MarkVisited(url string) {
 	defer c.mu.Unlock()
 	c.visited[url] = true
 }
-
+func solutionAlreadyExist(node *TreeNode, solutionList []*TreeNode) bool {
+	for i := 0; i < len(solutionList); i++ {
+		if node.Parent == nil {
+			if node.Link == solutionList[i].Link {
+				return true
+			}
+		} else {
+			if node.Link == solutionList[i].Link && node.Parent.Link == solutionList[i].Parent.Link {
+				return true
+			}
+		}
+	}
+	return false
+}
 func isSameNode(node1 *TreeNode, node2 *TreeNode, target string) bool {
 	temp1 := node1
 	temp2 := node2
@@ -50,24 +64,14 @@ func isSameNode(node1 *TreeNode, node2 *TreeNode, target string) bool {
 	}
 	return true
 }
-func isAlreadyExist(node *TreeNode, nodeList []*TreeNode, target string) bool {
-	for i := 0; i < len(nodeList); i++ {
-		if isSameNode(node, nodeList[i], target) {
-			return true
-		}
-	}
-	return false
-}
 
-func getTitle(link string) string {
+func getImage(link string) string {
 	// Instantiate a new collector
 	c := colly.NewCollector()
-	title := ""
 	// Find and visit link
-	c.OnHTML("span.mw-page-title-main", func(e *colly.HTMLElement) {
-		// Extract text or any other attribute you want
-
-		title = e.Text
+	src := ""
+	c.OnHTML("a.mw-file-description img", func(e *colly.HTMLElement) {
+		src = e.Attr("src")
 	})
 
 	c.OnScraped(func(r *colly.Response) {
@@ -78,114 +82,47 @@ func getTitle(link string) string {
 	c.Visit("https://en.wikipedia.org" + link)
 
 	c.Wait()
-	return title
+	return src
 }
+func getTitle(link string) string {
+	// Instantiate a new collector
+	c := colly.NewCollector()
+	// Find and visit link
+	src := ""
+	c.OnHTML("h1#firstHeading", func(e *colly.HTMLElement) {
+		// Extract text or any other attribute you want
+		src = strings.TrimSpace(e.DOM.Text())
+	})
 
-func isLinkValid(node *TreeNode) bool {
-	if strings.Contains(node.Link, "#") || strings.Contains(node.Link, "Main_Page") || strings.Contains(node.Link, ":") {
-		return false
-	} else {
-		return true
-	}
+	c.OnScraped(func(r *colly.Response) {
+		// fmt.Println("Scraping finished for", r.Request.URL.String())
+
+	})
+	// Visit the URL you want to scrape
+	c.Visit("https://en.wikipedia.org" + link)
+
+	c.Wait()
+	return src
 }
-
-// Format link = /wiki/Title , e.g: /wiki/Albert_Einstein
-
-// func ScrapeLink1(node *TreeNode, target string, listLink []*TreeNode) {
-// 	// if node.Parent != nil {
-// 	// 	fmt.Println("Scrape : ", node.Parent.Link, "  ", node.Link, "  ", node.id)
-// 	// } else {
-// 	// 	fmt.Println("Scrape : ", node.Link, "  ", node.id)
-
-// 	// }
-// 	if node.Link[0:6] == "/wiki/" {
-// 		url := "https://en.wikipedia.org" + node.Link
-// 		resp, err := http.Get(url)
-// 		if err != nil {
-// 			fmt.Printf("Error fetching %s: %s\n", url, err)
-// 			return
-// 		}
-// 		defer resp.Body.Close()
-
-// 		if resp.StatusCode != http.StatusOK {
-// 			fmt.Printf("Failed to fetch %s: %s\n", url, resp.Status)
-// 			return
-// 		}
-
-// 		// Parse the HTML response using streaming
-// 		tokenizer := html.NewTokenizer(resp.Body)
-// 		for {
-// 			tokenType := tokenizer.Next()
-// 			switch tokenType {
-// 			case html.ErrorToken:
-// 				// End of the document, or an error occurred
-// 				return
-// 			case html.StartTagToken, html.SelfClosingTagToken:
-// 				token := tokenizer.Token()
-// 				if token.Data == "a" {
-// 					var link, text string
-// 					isLink := false
-// 					for _, attr := range token.Attr {
-// 						if attr.Key == "href" && len(attr.Val) > 6 {
-// 							if attr.Val[0:6] == "/wiki/" && attr.Val != node.Link {
-// 								link = attr.Val // Store the href attribute value
-// 								isLink = true
-// 								break
-// 							}
-
-// 						}
-// 					}
-// 					// Get the text content inside the <a> tag
-// 					if isLink {
-// 						tokenType = tokenizer.Next()
-// 						if tokenType == html.TextToken {
-// 							text = strings.TrimSpace(tokenizer.Token().Data)
-// 						}
-// 						node.AddChild(NewTreeNode(text, link))
-// 						if isAlreadyExist(node.Children[len(node.Children)-1], listLink, target) || !isLinkValid(node.Children[len(node.Children)-1]) {
-// 							removeChild(node, len(node.Children)-1)
-// 						} else {
-// 							listLink = append(listLink, node.Children[len(node.Children)-1])
-
-// 						}
-// 					}
-
-// 				} else if token.Data == "span" {
-// 					for _, a := range token.Attr {
-// 						if a.Key == "class" && strings.Contains(a.Val, "mw-page-title-main") {
-// 							tokenizer.Next()
-// 							pageTitle := tokenizer.Token().Data
-// 							node.Title = pageTitle
-// 							break
-// 						}
-// 					}
-// 				}
-// 			}
-// 		}
-// 	} else {
-// 		fmt.Println("ERROR: Input link is not valid !")
-// 	}
-
-// }
-
 func ScrapeLink(node *TreeNode, target string, cache *Cache) {
-	if node.Parent != nil {
-		fmt.Println("Scrape :", node.Parent.Link, "  ", node.Link, "  ", node.id)
-	} else {
-		fmt.Println("Scrape : ", node.Link, "  ", node.id)
+	// if node.Parent != nil {
+	// 	fmt.Println("Scrape :", node.Parent.Link, "  ", node.Link, "  ", node.id)
+	// } else {
+	// 	fmt.Println("Scrape : ", node.Link, "  ", node.id)
 
-	}
+	// }
 	if node.Link[0:6] == "/wiki/" {
 
-		// res, err := http.Get("https://en.wikipedia.org" + node.Link)
-		// if err != nil {
-		// 	log.Fatal(err)
-		// }
-		// defer res.Body.Close()
-		// if res.StatusCode != 200 {
-		// 	// log.Fatal("status code error: %d %s", res.StatusCode, res.Status)
-		// 	return
-		// }
+		res, err := http.Get("https://en.wikipedia.org" + node.Link)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer res.Body.Close()
+		if res.StatusCode != 200 {
+			// log.Fatal("status code error: %d %s", res.StatusCode, res.Status)
+			return
+		}
+
 		if value, ok := mapCache.Load(node.Link); ok {
 			if value != nil {
 				for i := 0; i < len(value.([]*TreeNode)); i++ {
@@ -195,10 +132,15 @@ func ScrapeLink(node *TreeNode, target string, cache *Cache) {
 			}
 
 		}
+		// rp, err := proxy.RoundRobinProxySwitcher("socks5://158.180.52.194:1080")
+		// if err != nil {
+		// 	log.Fatal(err)
+		// }
 		c := colly.NewCollector(
 			colly.AllowedDomains("en.wikipedia.org"),
 			// colly.Async(true),
 		)
+		// c.SetProxyFunc(rp)
 
 		q, _ := queue.New(
 			15, // Number of consumer threads
