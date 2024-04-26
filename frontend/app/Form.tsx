@@ -48,6 +48,7 @@ const Form = () => {
 	}
 	const submitHandler = async (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
+		setResult(undefined)
 		if (config.start === '' || config.goal === '') {
 			toast({
 				title: '⚠️💀Information not complete💀⚠️',

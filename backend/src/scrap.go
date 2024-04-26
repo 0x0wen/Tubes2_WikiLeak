@@ -70,10 +70,14 @@ func getImage(link string) string {
 	c := colly.NewCollector()
 	// Find and visit link
 	src := ""
+	found := false
 	c.OnHTML("a.mw-file-description img", func(e *colly.HTMLElement) {
-		src = e.Attr("src")
-	})
-
+		if !found {
+			src = e.Attr("src")
+		}
+		found = true
+	})	
+		
 	c.OnScraped(func(r *colly.Response) {
 		// fmt.Println("Scraping finished for", r.Request.URL.String())
 
