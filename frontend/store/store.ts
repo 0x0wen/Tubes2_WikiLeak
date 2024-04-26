@@ -12,9 +12,6 @@ export interface PathType {
     Title: string;
 }
 
-export interface BonusPathType{
-    paths: PathType[];
-}
 
 interface FormState {
     startSuggestions: suggestionType[];
@@ -31,9 +28,9 @@ interface FormState {
 
 interface ResultState {
     isLoading: boolean;
-    result: { time: number; checkedArticles: number; passedArticles: number; path: PathType[] | BonusPathType[]  } | null;
+    result: { time: number; checkedArticles: number; passedArticles: number; path: PathType[] | PathType[][]  } | null;
     setIsLoading: (isLoading: boolean) => void;
-    setResult: (result: { time: number; checkedArticles: number; passedArticles: number; path: PathType[] | BonusPathType[]  }) => void;
+    setResult: (result: { time: number; checkedArticles: number; passedArticles: number; path: PathType[] | PathType[][]  }) => void;
 }   
 
 
