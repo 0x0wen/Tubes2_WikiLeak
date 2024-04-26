@@ -20,7 +20,7 @@ const ResultCard = () => {
 	return (
 		<>
 			{isLoading ? (
-				<div className="flex flex-col justify-center items-center">
+				<div className="w-full min-h-screen flex flex-col justify-center items-center">
 					<Image src={pikachu} alt="pikachu" className="aspect-square w-80" />
 					<p className="font-mono pt-2">Finding the leak🔎...</p>
 				</div>
