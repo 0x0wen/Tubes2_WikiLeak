@@ -9,6 +9,8 @@ import (
 )
 
 func main() {
+	// IDS("/wiki/Talang_(Swedish_TV_series)", "/wiki/Sweden")
+	// BFS("/wiki/Mike_Tyson", "Sweden")
 	// Create an HTTP handler
 	handler := http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		// Allow requests from any origin

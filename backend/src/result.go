@@ -3,8 +3,9 @@ package main
 import "sync"
 
 type Website struct {
-	Link  string
-	Title string
+	Link      string
+	Title     string
+	Imagepath string
 }
 
 // list of path
@@ -23,10 +24,11 @@ type ResultBonus struct {
 	Duration    int64
 }
 
-func NewWebsite(link string, title string) Website {
+func NewWebsite(link string, title string, imagePath string) Website {
 	return Website{
-		Link:  link,
-		Title: title,
+		Link:      link,
+		Title:     title,
+		Imagepath: imagePath,
 	}
 
 }
