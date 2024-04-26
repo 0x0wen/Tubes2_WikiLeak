@@ -2,6 +2,8 @@
 Tugas Besar 2 Strategi Algoritma IF2211
 
 ## Developers
+| Name                       | ID                 | 
+| ---------------------------|--------------------| 
 | Owen Tobias Sinurat        | 13522131           | 
 | Andi Marihot Sitorus       | 13522138           | 
 | Albert Ghazaly             | 13522150           | 
