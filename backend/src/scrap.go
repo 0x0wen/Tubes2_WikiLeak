@@ -68,6 +68,13 @@ func isSameNode(node1 *TreeNode, node2 *TreeNode, target string) bool {
 func getImage(link string) string {
 	// Instantiate a new collector
 	c := colly.NewCollector()
+	q, _ := queue.New(
+		15, // Number of consumer threads
+		&queue.InMemoryQueueStorage{MaxSize: 200}, // Use in-memory queue storage
+	)
+
+	q.AddURL("https://en.wikipedia.org" + link)
+
 	// Find and visit link
 	src := ""
 	found := false
@@ -82,15 +89,21 @@ func getImage(link string) string {
 		// fmt.Println("Scraping finished for", r.Request.URL.String())
 
 	})
-	// Visit the URL you want to scrape
-	c.Visit("https://en.wikipedia.org" + link)
+	q.Run(c)
 
-	c.Wait()
-	return src
+	return img
+
 }
 func getTitle(link string) string {
 	// Instantiate a new collector
 	c := colly.NewCollector()
+	q, _ := queue.New(
+		15, // Number of consumer threads
+		&queue.InMemoryQueueStorage{MaxSize: 200}, // Use in-memory queue storage
+	)
+
+	q.AddURL("https://en.wikipedia.org" + link)
+
 	// Find and visit link
 	src := ""
 	c.OnHTML("h1#firstHeading", func(e *colly.HTMLElement) {
@@ -102,10 +115,8 @@ func getTitle(link string) string {
 		// fmt.Println("Scraping finished for", r.Request.URL.String())
 
 	})
-	// Visit the URL you want to scrape
-	c.Visit("https://en.wikipedia.org" + link)
 
-	c.Wait()
+	q.Run(c)
 	return src
 }
 func ScrapeLink(node *TreeNode, target string, cache *Cache) {
@@ -160,6 +171,7 @@ func ScrapeLink(node *TreeNode, target string, cache *Cache) {
 		})
 		c.OnHTML("a[href]", func(e *colly.HTMLElement) {
 			// Extract the href attribute of the <a> element
+
 			link := e.Attr("href")
 			teks := e.Text
 			// results <- link // Send the link to the results channel
@@ -168,6 +180,7 @@ func ScrapeLink(node *TreeNode, target string, cache *Cache) {
 					cache.MarkVisited(link)
 				}
 				if len(link) >= 6 {
+
 					if link[0:6] == "/wiki/" {
 						if strings.Contains(link, "#") || strings.Contains(link, "Main_Page") || strings.Contains(link, ":") || link == node.Link {
 							// do nothing

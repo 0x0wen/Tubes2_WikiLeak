@@ -6,21 +6,23 @@ import (
 
 // def
 type TreeNode struct {
-	Title    string
-	Link     string
-	Parent   *TreeNode
-	Children []*TreeNode
-	id       int
+	Title     string
+	Link      string
+	Parent    *TreeNode
+	Children  []*TreeNode
+	id        int
+	imagePath string
 }
 
 // ctor
 func NewTreeNode(title string, link string) *TreeNode {
 	return &TreeNode{
-		Title:    title,
-		Link:     link,
-		Parent:   nil,
-		Children: []*TreeNode{},
-		id:       0,
+		Title:     title,
+		Link:      link,
+		Parent:    nil,
+		Children:  []*TreeNode{},
+		id:        0,
+		imagePath: "",
 	}
 }
 

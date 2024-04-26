@@ -12,6 +12,7 @@ func IDSRace(node *TreeNode, target string) (*TreeNode, int, int) {
 
 	found := false
 	visit := 1
+	node.Title = getTitle(node.Link)
 
 	if node.Link == target {
 		return node, 1, visit
@@ -26,7 +27,7 @@ func IDSRace(node *TreeNode, target string) (*TreeNode, int, int) {
 		visit = 1
 		queue := []*TreeNode{node}
 		for len(queue) != 0 && !found {
-			iter = min(len(queue), 450)
+			iter = min(len(queue), 150)
 
 			if queue[0].id == 0 {
 				for j := 0; j < len(queue[0].Children); j++ {
@@ -89,6 +90,7 @@ func IDSRace(node *TreeNode, target string) (*TreeNode, int, int) {
 func IDSRaceBonus(node *TreeNode, target string) ([]*TreeNode, int, int) {
 
 	var wg sync.WaitGroup
+	node.Title = getTitle(node.Link)
 
 	found := false
 	visit := 1
@@ -188,8 +190,14 @@ func IDS(pathAwal string, pathAkhir string) Result {
 	fmt.Println("Total Visit: ", visit)
 	fmt.Println("Path length: ", length)
 	var path []Website
+	temp := result
+	for temp != nil {
+		temp.Title = getTitle(temp.Link)
+		temp.imagePath = getImage(temp.Link)
+		temp = temp.Parent
+	}
 	for result != nil {
-		path = append([]Website{NewWebsite(result.Link, getTitle(result.Link), getImage(result.Link))}, path...)
+		path = append([]Website{NewWebsite(result.Link, result.Title, result.imagePath)}, path...)
 		result = result.Parent
 	}
 	for i := 0; i < len(path); i++ {
@@ -211,11 +219,29 @@ func IDSBonus(pathAwal string, pathAkhir string) ResultBonus {
 	fmt.Println("Duration: ", duration.Milliseconds(), " ms")
 	fmt.Println("Total Visit: ", visit)
 	fmt.Println("Path lengrh: ", length)
+	var wg sync.WaitGroup
 	var pathList [][]Website
+	for i := 0; i < len(result); i++ {
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+
+			temp := result[i]
+			for temp != nil {
+
+				temp.Title = getTitle(temp.Link)
+				temp.imagePath = getImage(temp.Link)
+				temp = temp.Parent
+			}
+		}(i)
+
+	}
+	wg.Wait()
 	for i := 0; i < len(result); i++ {
 		path := []Website{}
 		for result[i] != nil {
-			path = append([]Website{NewWebsite(result[i].Link, getTitle(result[i].Link), getImage(result[i].Link))}, path...)
+
+			path = append([]Website{NewWebsite(result[i].Link, result[i].Title, result[i].imagePath)}, path...)
 			result[i] = result[i].Parent
 		}
 		pathList = append(pathList, path)
@@ -226,6 +252,7 @@ func IDSBonus(pathAwal string, pathAkhir string) ResultBonus {
 		for j := 0; j < len(pathList[i]); j++ {
 			fmt.Println("Title: ", pathList[i][j].Title)
 			fmt.Println("Link: ", pathList[i][j].Link)
+			fmt.Println("Image: ", pathList[i][j].Imagepath)
 		}
 	}
 	return NewResultBonus(pathList, length, visit, duration.Milliseconds())
