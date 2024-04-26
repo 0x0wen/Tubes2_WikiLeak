@@ -7,9 +7,13 @@ interface suggestionType {
     thumbnailUrl: string;
 }
 
-interface PathType {
+export interface PathType {
     Link: string;
     Title: string;
+}
+
+export interface BonusPathType{
+    paths: PathType[];
 }
 
 interface FormState {
@@ -17,19 +21,19 @@ interface FormState {
     goalSuggestions: suggestionType[];
     openStartSuggestions: boolean;
     openGoalSuggestions: boolean;
-    config: { start: string; goal: string; algorithm: string };
+    config: { start: string; goal: string; algorithm: string; solution:string };
     setStartSuggestions: (startSuggestions: suggestionType[]) => void;
     setGoalSuggestions: (goalSuggestions: suggestionType[]) => void;
     setOpenStartSuggestions: (openStartSuggestions: boolean) => void;
     setOpenGoalSuggestions: (openGoalSuggestions: boolean) => void;
-    setConfig: (config: { start: string; goal: string; algorithm: string }) => void;
+    setConfig: (config: { start: string; goal: string; algorithm: string; solution:string }) => void;
 }
 
 interface ResultState {
     isLoading: boolean;
-    result: { time: number; checkedArticles: number; passedArticles: number; path: PathType[] } | null;
+    result: { time: number; checkedArticles: number; passedArticles: number; path: PathType[] | BonusPathType[]  } | null;
     setIsLoading: (isLoading: boolean) => void;
-    setResult: (result: { time: number; checkedArticles: number; passedArticles: number; path: PathType[] }) => void;
+    setResult: (result: { time: number; checkedArticles: number; passedArticles: number; path: PathType[] | BonusPathType[]  }) => void;
 }   
 
 
@@ -47,7 +51,7 @@ export const useFormStore = create<FormState>((set) => ({
     goalSuggestions: [],
     openStartSuggestions: false,
     openGoalSuggestions: false,
-    config: { start: '', goal: '', algorithm: 'IDS' },
+    config: { start: '', goal: '', algorithm: 'BFS', solution:'First' },
     setStartSuggestions: (startSuggestions) => set({ startSuggestions }),
     setGoalSuggestions: (goalSuggestions) => set({ goalSuggestions }),
     setOpenStartSuggestions: (openStartSuggestions) => set({ openStartSuggestions }),

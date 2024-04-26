@@ -42,6 +42,7 @@ func main() {
 			Start     string `json:"start"`
 			Goal      string `json:"goal"`
 			Algorithm string `json:"algorithm"`
+			Solution  string `json:"solution"`
 			// Add more fields as needed
 		}
 
@@ -53,37 +54,61 @@ func main() {
 		}
 
 		// Now you can use requestData.Start and requestData.Goal in your backend logic
-		log.Printf("Start: %s, Goal: %s, Algorithm: %s\n", requestData.Start, requestData.Goal, requestData.Algorithm)
-
+		log.Printf("Start: %s, Goal: %s, Algorithm: %s, Solution: %s\n", requestData.Start, requestData.Goal, requestData.Algorithm, requestData.Solution)
 		type ResponseData struct {
 			Status string `json:"status"`
 			Result Result `json:"result"`
 		}
-
+		type ResponseDataBonus struct {
+			Status string      `json:"status"`
+			Result ResultBonus `json:"result"`
+		}
 		// Inside the handler function:
 		responseData := ResponseData{
 			Status: "ok",
 		}
+		// Inside the handler function:
+		responseDataBonus := ResponseDataBonus{
+			Status: "ok",
+		}
+		if requestData.Solution == "All" {
+			if requestData.Algorithm == "BFS" {
+				responseDataBonus.Result = BFSBonus(requestData.Start, requestData.Goal)
 
-		if requestData.Algorithm == "BFS" {
-			responseData.Result = BFS(requestData.Start, requestData.Goal)
-		} else if requestData.Algorithm == "IDS" {
-			responseData.Result = IDS(requestData.Start, requestData.Goal)
+			} else if requestData.Algorithm == "IDS" {
+				responseDataBonus.Result = IDSBonus(requestData.Start, requestData.Goal)
+			}
+			// Marshal the response data to JSON
+			respJSON, err := json.Marshal(responseDataBonus)
+			if err != nil {
+				http.Error(rw, "Internal Server Error", http.StatusInternalServerError)
+				return
+			} // Set response headers
+			rw.Header().Set("Content-Type", "application/json")
+			rw.Header().Set("Content-Length", fmt.Sprint(len(respJSON)))
+
+			// Write the response
+			rw.Write(respJSON)
+		} else {
+
+			if requestData.Algorithm == "BFS" {
+				responseData.Result = BFS(requestData.Start, requestData.Goal)
+			} else if requestData.Algorithm == "IDS" {
+				responseData.Result = IDS(requestData.Start, requestData.Goal)
+			}
+			// Marshal the response data to JSON
+			respJSON, err := json.Marshal(responseData)
+			if err != nil {
+				http.Error(rw, "Internal Server Error", http.StatusInternalServerError)
+				return
+			} // Set response headers
+			rw.Header().Set("Content-Type", "application/json")
+			rw.Header().Set("Content-Length", fmt.Sprint(len(respJSON)))
+
+			// Write the response
+			rw.Write(respJSON)
 		}
 
-		// Marshal the response data to JSON
-		respJSON, err := json.Marshal(responseData)
-		if err != nil {
-			http.Error(rw, "Internal Server Error", http.StatusInternalServerError)
-			return
-		}
-
-		// Set response headers
-		rw.Header().Set("Content-Type", "application/json")
-		rw.Header().Set("Content-Length", fmt.Sprint(len(respJSON)))
-
-		// Write the response
-		rw.Write(respJSON)
 	})
 
 	// Start the server
