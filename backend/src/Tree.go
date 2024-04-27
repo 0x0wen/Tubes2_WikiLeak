@@ -32,15 +32,6 @@ func (node *TreeNode) AddChild(child *TreeNode) {
 	child.id = node.id + 1
 	node.Children = append(node.Children, child)
 }
-func removeChild(node *TreeNode, index int) {
-	// Check if index is valid
-	if index < 0 || index >= len(node.Children) {
-		return // Index out of range
-	}
-
-	// Remove the child at the specified index
-	node.Children = append(node.Children[:index], node.Children[index+1:]...)
-}
 
 // get children num
 func (node *TreeNode) GetNumberOfNodes() int {

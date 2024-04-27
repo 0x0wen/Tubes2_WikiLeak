@@ -44,7 +44,7 @@ func BFSRace(node *TreeNode, target string, listLink []*TreeNode) (*TreeNode, in
 			for j := 0; j < len(queue); j++ {
 				visit += 1
 				// if queue[0].Children[j] != nil {
-				fmt.Println("BFS ", visit, " : ", queue[j].Parent.Link, " ", queue[j].Link, " ", queue[j].id)
+				// fmt.Println("BFS ", visit, " : ", queue[j].Parent.Link, " ", queue[j].Link, " ", queue[j].id)
 				// }
 				if queue[j].Link == target {
 					return queue[j], queue[j].id + 1, visit
@@ -72,7 +72,7 @@ func BFSRace(node *TreeNode, target string, listLink []*TreeNode) (*TreeNode, in
 				for j := 0; j < len(queue[k].Children); j++ {
 					visit += 1
 					// if queue[k].Children[j] != nil {
-					fmt.Println("BFS ", visit, " : ", queue[k].Link, " ", queue[k].Children[j].Link, " ", queue[k].Children[j].id)
+					// fmt.Println("BFS ", visit, " : ", queue[k].Link, " ", queue[k].Children[j].Link, " ", queue[k].Children[j].id)
 					// }
 					if queue[k].Children[j].Link == target {
 						return queue[k].Children[j], queue[k].Children[j].id + 1, visit
@@ -124,7 +124,7 @@ func BFSRaceBonus(node *TreeNode, target string, listLink []*TreeNode) ([]*TreeN
 			queue = append(queue, queue[0].Children...)
 			for j := 0; j < len(queue[0].Children); j++ {
 				visit += 1
-				fmt.Println("BFS ", visit, " : ", queue[0].Link, " ", queue[0].Children[j].Link, " ", queue[0].Children[j].id)
+				// fmt.Println("BFS ", visit, " : ", queue[0].Link, " ", queue[0].Children[j].Link, " ", queue[0].Children[j].id)
 				if queue[0].Children[j].Link == target {
 					// Modify the title of the target node
 					if depth == -1 {
@@ -157,7 +157,7 @@ func BFSRaceBonus(node *TreeNode, target string, listLink []*TreeNode) ([]*TreeN
 				queue = append(queue, queue[k].Children...)
 				for j := 0; j < len(queue[k].Children) && (depth == -1 || depth > queue[k].id); j++ {
 					visit += 1
-					fmt.Println("BFS ", visit, " : ", queue[k].Link, " ", queue[k].Children[j].Link, " ", queue[k].Children[j].id)
+					// fmt.Println("BFS ", visit, " : ", queue[k].Link, " ", queue[k].Children[j].Link, " ", queue[k].Children[j].id)
 					if queue[k].Children[j].Link == target {
 						// Modify the title of the target node
 						if depth == -1 {
@@ -232,11 +232,11 @@ func BFS(pathAwal string, pathAkhir string) Result {
 		path = append([]Website{NewWebsite(result.Link, result.Title, result.imagePath)}, path...)
 		result = result.Parent
 	}
-	for i := 0; i < len(path); i++ {
-		fmt.Println("Title: ", path[i].Title)
-		fmt.Println("Link: ", path[i].Link)
-		fmt.Println("Img: ", path[i].Imagepath)
-	}
+	// for i := 0; i < len(path); i++ {
+	// 	fmt.Println("Title: ", path[i].Title)
+	// 	fmt.Println("Link: ", path[i].Link)
+	// 	fmt.Println("Img: ", path[i].Imagepath)
+	// }
 	return NewResult(path, length, visit, duration.Milliseconds())
 
 }
@@ -281,13 +281,13 @@ func BFSBonus(pathAwal string, pathAkhir string) ResultBonus {
 		pathList = append(pathList, path)
 
 	}
-	for i := 0; i < len(pathList); i++ {
-		fmt.Println("Result ", i+1)
-		for j := 0; j < len(pathList[i]); j++ {
-			fmt.Println("Title: ", pathList[i][j].Title)
-			fmt.Println("Link: ", pathList[i][j].Link)
-			fmt.Println("Image: ", pathList[i][j].Imagepath)
-		}
-	}
+	// for i := 0; i < len(pathList); i++ {
+	// 	fmt.Println("Result ", i+1)
+	// 	for j := 0; j < len(pathList[i]); j++ {
+	// 		fmt.Println("Title: ", pathList[i][j].Title)
+	// 		fmt.Println("Link: ", pathList[i][j].Link)
+	// 		fmt.Println("Image: ", pathList[i][j].Imagepath)
+	// 	}
+	// }
 	return NewResultBonus(pathList, length, visit, duration.Milliseconds())
 }

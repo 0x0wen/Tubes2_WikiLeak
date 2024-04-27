@@ -48,29 +48,13 @@ func solutionAlreadyExist(node *TreeNode, solutionList []*TreeNode) bool {
 	}
 	return false
 }
-func isSameNode(node1 *TreeNode, node2 *TreeNode, target string) bool {
-	temp1 := node1
-	temp2 := node2
-	if temp2.Link == target && temp1.Link == target {
-		for temp1 != nil && temp2 != nil {
-			if temp1.Link != temp2.Link {
-				return false
-			}
-			temp1 = temp1.Parent
-			temp2 = temp2.Parent
-		}
-	} else {
-		return node1.Link == node2.Link
-	}
-	return true
-}
 
 func getImage(link string) string {
 	// Instantiate a new collector
 	c := colly.NewCollector()
 	q, _ := queue.New(
-		15, // Number of consumer threads
-		&queue.InMemoryQueueStorage{MaxSize: 200}, // Use in-memory queue storage
+		15, // Number threads
+		&queue.InMemoryQueueStorage{MaxSize: 200},
 	)
 
 	q.AddURL("https://en.wikipedia.org" + link)
@@ -79,6 +63,7 @@ func getImage(link string) string {
 	img := ""
 	var gained bool
 	c.OnHTML("a.mw-file-description img", func(e *colly.HTMLElement) {
+		// extract image
 		if !gained {
 			img = e.Attr("src")
 
@@ -100,8 +85,8 @@ func getTitle(link string) string {
 	// Instantiate a new collector
 	c := colly.NewCollector()
 	q, _ := queue.New(
-		15, // Number of consumer threads
-		&queue.InMemoryQueueStorage{MaxSize: 200}, // Use in-memory queue storage
+		15, // Number threads
+		&queue.InMemoryQueueStorage{MaxSize: 200}, 
 	)
 
 	q.AddURL("https://en.wikipedia.org" + link)
@@ -109,7 +94,7 @@ func getTitle(link string) string {
 	// Find and visit link
 	src := ""
 	c.OnHTML("h1#firstHeading", func(e *colly.HTMLElement) {
-		// Extract text or any other attribute you want
+		// Extract title
 		src = strings.TrimSpace(e.DOM.Text())
 	})
 
@@ -160,15 +145,15 @@ func ScrapeLink(node *TreeNode, target string, cache *Cache) {
 		// c.SetProxyFunc(rp)
 
 		q, _ := queue.New(
-			15, // Number of consumer threads
-			&queue.InMemoryQueueStorage{MaxSize: 200}, // Use in-memory queue storage
+			15, // Number threads
+			&queue.InMemoryQueueStorage{MaxSize: 200}, 
 		)
 
 		q.AddURL("https://en.wikipedia.org" + node.Link)
 
-		// Define a callback function to be executed when a link is found
+		
 		c.OnHTML("h1#firstHeading", func(e *colly.HTMLElement) {
-			// Extract text or any other attribute you want
+			// Extract title
 			node.Title = strings.TrimSpace(e.DOM.Text())
 		})
 		c.OnHTML("a[href]", func(e *colly.HTMLElement) {
@@ -176,7 +161,6 @@ func ScrapeLink(node *TreeNode, target string, cache *Cache) {
 
 			link := e.Attr("href")
 			teks := e.Text
-			// results <- link // Send the link to the results channel
 			if !cache.IsVisited(link) {
 				if link != target {
 					cache.MarkVisited(link)
@@ -196,7 +180,7 @@ func ScrapeLink(node *TreeNode, target string, cache *Cache) {
 
 		})
 
-		// Define a callback function to be executed when the scraping is complete
+		// callback function 
 		c.OnScraped(func(r *colly.Response) {
 			if _, ok := mapCache.Load(node.Link); !ok {
 				mapCache.Store(node.Link, node.Children)
