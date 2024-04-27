@@ -60,16 +60,13 @@ func getImage(link string) string {
 	q.AddURL("https://en.wikipedia.org" + link)
 
 	// Find and visit link
-	img := ""
-	var gained bool
+	src := ""
+	found := false
 	c.OnHTML("a.mw-file-description img", func(e *colly.HTMLElement) {
-		// extract image
-		if !gained {
-			img = e.Attr("src")
-
-			gained = true
+		if !found {
+			src = e.Attr("src")
 		}
-
+		found = true
 	})
 
 	c.OnScraped(func(r *colly.Response) {
@@ -78,8 +75,7 @@ func getImage(link string) string {
 	})
 	q.Run(c)
 
-	return img
-
+	return src
 }
 func getTitle(link string) string {
 	// Instantiate a new collector

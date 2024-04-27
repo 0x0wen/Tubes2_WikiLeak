@@ -17,7 +17,7 @@ const ResultCard = () => {
 	return (
 		<>
 			{isLoading ? (
-				<div className="w-full min-h-screen flex flex-col justify-center items-center">
+				<div className="w-full h-screen flex flex-col justify-center items-center">
 					<Image src={pikachu} alt="pikachu" className="aspect-square w-80" />
 					<p className="font-mono pt-2">Finding the leak🔎...</p>
 				</div>
@@ -65,7 +65,7 @@ const ResultCard = () => {
 									<div className="flex flex-col  bg-foreground rounded-xl border border-white ">
 										{result?.path.map((path, index) => (
 											<div key={index}>
-												<div className=" grid grid-cols-[25px_1fr] items-center p-4  text-primary-foreground ">
+												<div className="flex gap-2 items-center p-4  text-primary-foreground ">
 													<p>
 														{index === 0
 															? '1️⃣'
@@ -87,6 +87,14 @@ const ResultCard = () => {
 															? '9️⃣'
 															: '🔟'}
 													</p>
+													<Image
+														src={`https:${(path as PathType).Imagepath}`}
+														alt="?"
+														width={40}
+														height={40}
+														objectFit="cover"
+														className='aspect-square object-cover object-center'
+													/>
 													<a
 														href={`https://en.wikipedia.org${
 															(path as PathType).Link
@@ -155,7 +163,7 @@ const ResultCard = () => {
 								<div className="flex flex-col rounded-xl border border-white ">
 									{(solutions as PathType[]).map((solution, index) => (
 										<div key={index}>
-											<div className=" grid grid-cols-[25px_1fr] items-center p-4  text-primary-foreground ">
+											<div className="flex gap-2 items-center p-4  text-primary-foreground ">
 												<p>
 													{index === 0
 														? '1️⃣'
@@ -177,6 +185,14 @@ const ResultCard = () => {
 														? '9️⃣'
 														: '🔟'}
 												</p>
+												<Image
+													src={`https:${(solution as PathType).Imagepath}`}
+													alt="?"
+													width={40}
+													height={40}
+													objectFit="cover"
+													className='aspect-square object-cover object-center'
+												/>
 												<a
 													href={`https://en.wikipedia.org${solution.Link}`}
 													target="_blank"
@@ -190,7 +206,7 @@ const ResultCard = () => {
 														  )}
 												</a>
 											</div>
-											{index + 1 !== result?.path.length && <Separator />}
+											{index + 1 !== solutions.length && <Separator />}
 										</div>
 									))}
 								</div>

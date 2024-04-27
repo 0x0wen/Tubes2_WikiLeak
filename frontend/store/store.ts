@@ -10,6 +10,7 @@ interface suggestionType {
 export interface PathType {
     Link: string;
     Title: string;
+    Imagepath:string;
 }
 
 
@@ -30,7 +31,7 @@ interface ResultState {
     isLoading: boolean;
     result: { time: number; checkedArticles: number; passedArticles: number; path: PathType[] | PathType[][]  } | null;
     setIsLoading: (isLoading: boolean) => void;
-    setResult: (result: { time: number; checkedArticles: number; passedArticles: number; path: PathType[] | PathType[][]  }) => void;
+    setResult: (result: { time: number; checkedArticles: number; passedArticles: number; path: PathType[] | PathType[][]  } | undefined) => void;
 }   
 
 
